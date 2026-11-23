@@ -15,10 +15,11 @@ debug.log
 # Environment variables
 .env
 
-# Package cache
+# Yarn/PNPM cache
 .yarn/cache/
 .pnpm-deps.json
 
-# Build intermediates
-*.asar
+# misc
 *.exe
+*.dll
+*.pak
