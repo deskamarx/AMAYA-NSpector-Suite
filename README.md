@@ -1,0 +1,67 @@
+# AMAYA × NSpector — Unified Device Intelligence
+
+A single offline desktop suite that merges two existing apps:
+
+- **NSpector 1.0.0** — SQLite-backed dispatch, returns, dealer-custody and
+  duplicate-serial reasoning engine.
+- **AMAYA IMEI Control Center** — the workbook snapshot PWA (68,346 assets,
+  103,648 movement events) served unchanged.
+
+Both datasets live side by side, so the same IMEI can be inspected as one
+device with two evidence trails.
+
+## What is in the app
+
+| Workspace | What it does |
+| --- | --- |
+| **Overview** | Combined KPIs, exact IMEI reconciliation (54,915 matches), AMAYA lifecycle mix, NSpector exposure, priority findings. |
+| **Unified lookup** | One serial → NSpector custody trail, returns, findings and reasoning **plus** every AMAYA workbook occurrence, state and source citation. |
+| **Device ledger** | The full NSpector UI (Work Queue, Inspector, Exposure, Flows, Dealers, Ownership) with finding tracking. |
+| **IMEI Control Center** | The original AMAYA PWA embedded, with reload / fullscreen controls. |
+| **Data sources** | Local file inventory, snapshot versions and the four source workbooks. |
+
+## Run
+
+```powershell
+npm run pack                 # build dist\AMAYA-NSpector
+.\dist\AMAYA-NSpector\AMAYA-NSpector.exe
+```
+
+The window opens `http://localhost:4173`. Override the port with the `PORT`
+environment variable. The same server can be opened from another machine on
+the LAN at `http://<this-pc>:4173`.
+
+## Data
+
+- NSpector source CSV/TXT exports ship in `resources\data` inside the build and
+  are copied to `%APPDATA%\AMAYA NSpector\data` on first run. Drop updated
+  exports there and press **Sync**.
+- The SQLite database is `%APPDATA%\AMAYA NSpector\nspector.db`.
+- The AMAYA snapshot is bundled in `resources\amaya` and served read-only at
+  `/amaya-imei-control-center/`.
+
+Nothing is fetched at runtime; fonts, data and code are local.
+
+## Project layout
+
+```
+electron/main.js        desktop shell, first-run data seeding, menus
+server/server.js        unified Express API + WebSocket live sync
+server/amaya.js         AMAYA snapshot index, lookup, search, overlap
+server/db.js            SQLite schema/open
+server/core.js          CSV parsing / normalization
+server/sync.js          ingest pipeline
+server/reason.js        duplicate, TAC and price reasoning
+web/                    merged shell (index.html, shell.css, shell.js)
+web/nspector.js         NSpector client, scoped for the merged shell
+vendor/amaya/           AMAYA PWA snapshot
+scripts/build.js        assembles dist\AMAYA-NSpector
+scripts/check.js        static sanity checks
+```
+
+## Build notes
+
+`scripts/build.js` reuses the Electron runtime that sits one directory above
+this project (the installed NSpector) and packs `electron/`, `server/`, `web/`
+and `node_modules/` into `resources\app.asar` with
+`node_modules/better-sqlite3` unpacked for the Electron ABI.

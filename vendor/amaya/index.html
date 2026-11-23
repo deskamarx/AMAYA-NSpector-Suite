@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- imei-csp: injected by scripts/inject-csp.mjs from server/header-policy.json.
+         Present so hosts that cannot set response headers still enforce the policy.
+         WEAKER than the header form: frame-ancestors, report-uri, sandbox are ignored in a meta tag. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'none'; frame-src 'none'; manifest-src 'self'; media-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests" data-imei-csp />
+    <meta charset="UTF-8" />
+    <!-- No maximum-scale: pinning zoom blocks users who rely on magnification. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="IMEI Control" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- The plate, not --bg: the OS chrome sits above the app, and a splash of
+         the same colour as the page leaves the two regions indistinguishable. -->
+    <meta name="theme-color" content="#0b0f14" />
+    <meta
+      name="description"
+      content="AMAYA Industries IMEI Control Center: interactive IMEI deduplication, asset movement evidence, and conflict review."
+    />
+    <title>IMEI Control Center — AMAYA Industries</title>
+    <link rel="canonical" href="https://abraar05.github.io/amaya-imei-control-center/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AMAYA Industries" />
+    <meta property="og:title" content="IMEI Control Center — AMAYA Industries" />
+    <meta property="og:description" content="Interactive IMEI deduplication, asset movement evidence, and conflict review." />
+    <meta property="og:url" content="https://abraar05.github.io/amaya-imei-control-center/" />
+    <meta property="og:image" content="https://abraar05.github.io/amaya-imei-control-center/brand/amaya-rw.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="IMEI Control Center — AMAYA Industries" />
+    <meta name="twitter:description" content="Interactive IMEI deduplication, asset movement evidence, and conflict review." />
+    <meta name="twitter:image" content="https://abraar05.github.io/amaya-imei-control-center/brand/amaya-rw.png" />
+    <!-- Installability (Windows/Edge/Chrome, Android/Chrome) and standalone display. -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <!-- Fonts are vendored, not fetched from a CDN: this app has to work with no
+         network, and a request to fonts.googleapis.com on every load would tell a
+         third party that a device-inventory tool was opened, and from where.
+         Regenerate with `npm run fonts`. -->
+    <link rel="preload" href="./fonts/space-grotesk-500-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./fonts/dm-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="./fonts/fonts.css" />
+    <script src="./assets/base.js"></script>
+    <script src="./assets/device-media.js"></script>
+    <script type="module" crossorigin src="./assets/index-7236c35e.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-P2bQqE--.css">
+    <link rel="stylesheet" href="./assets/amaya-glass-58bed1277d.css">
+    <script defer src="./assets/amaya-glass-bce0f781.js"></script>
+  </head>
+  <body>
+    <noscript>
+      <div style="padding:24px;font-family:system-ui,sans-serif;color:#e6edf3;background:#0b0f14">
+        This tool needs JavaScript to read the local evidence snapshot. Enable JavaScript, then reload.
+      </div>
+    </noscript>
+    <div id="root"></div>
+  </body>
+</html>

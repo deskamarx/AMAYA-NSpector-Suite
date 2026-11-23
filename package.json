@@ -1,0 +1,21 @@
+{
+  "name": "amaya-nspector-suite",
+  "productName": "AMAYA NSpector",
+  "version": "1.0.0",
+  "description": "Unified device intelligence — NSpector ledger + AMAYA IMEI Control Center in one app",
+  "main": "electron/main.js",
+  "author": "AMAYA Industries × NSpector",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "pack": "node scripts/build.js",
+    "check": "node scripts/check.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "ws": "^8.18.0"
+  }
+}

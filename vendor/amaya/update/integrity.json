@@ -1,0 +1,19 @@
+{
+  "dataVersion": "9c567745135f",
+  "dataSeq": 2,
+  "generatedAt": "2026-11-22T21:15:01.180Z",
+  "files": {
+    "meta.json": {
+      "bytes": 1676,
+      "sha256": "9cfeaf6f8cb15195b680c1a9fc372347e09159ecf394823f8d5a0d6fe019bd2b"
+    },
+    "assets.json": {
+      "bytes": 3441460,
+      "sha256": "56d388679cca92f68f2bb0053293982d06531a9a10f743063b1093e84cfc9b00"
+    },
+    "events.json": {
+      "bytes": 4391910,
+      "sha256": "b7c6b9aa54c5cea25a318c33d34f051297813c8aeb7635823338920e4add0798"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "IMEI Control Center — AMAYA Industries",
+  "short_name": "IMEI Control",
+  "id": "/amaya-imei-control-center/",
+  "lang": "en",
+  "dir": "ltr",
+  "description": "AMAYA Industries IMEI Control Center: interactive IMEI deduplication, asset movement evidence, and conflict review.",
+  "start_url": "/amaya-imei-control-center/",
+  "scope": "/amaya-imei-control-center/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#081015",
+  "theme_color": "#0b0f14",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    { "src": "/amaya-imei-control-center/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/amaya-imei-control-center/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/amaya-imei-control-center/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/amaya-imei-control-center/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Review queue", "url": "/amaya-imei-control-center/#/review" },
+    { "name": "Asset ledger", "url": "/amaya-imei-control-center/#/ledger" },
+    { "name": "Movement evidence", "url": "/amaya-imei-control-center/#/evidence" },
+    { "name": "Verification worklist", "url": "/amaya-imei-control-center/verify.html" }
+  ]
+}

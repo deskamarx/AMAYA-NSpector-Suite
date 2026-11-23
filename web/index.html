@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#05070f">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ws:; font-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>AMAYA × NSpector — Unified Device Intelligence</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="nspector.css">
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+<div id="shell">
+  <aside id="rail">
+    <button class="rail-brand" data-ws="overview" title="AMAYA × NSpector">
+      <span class="brand-mark">N<span>S</span></span>
+      <span class="brand-copy">
+        <strong>AMAYA <i>×</i> NSpector</strong>
+        <small>Device integrity suite</small>
+      </span>
+    </button>
+
+    <nav id="railnav" aria-label="Workspaces">
+      <button data-ws="overview" class="active" title="Overview">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
+        <span>Overview</span>
+      </button>
+      <button data-ws="lookup" title="Unified lookup">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 0 4.55 13.46l4.25 4.24 1.41-1.41-4.24-4.25A7.5 7.5 0 0 0 10.5 3Zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"/></svg>
+        <span>Unified lookup</span>
+      </button>
+      <button data-ws="devices" title="Device ledger">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 5h16v3H4V9Zm0 5h10v3H4v-3Zm0 5h10v2H4v-2Zm12 0h4v2h-4v-2Z"/></svg>
+        <span>Device ledger</span>
+      </button>
+      <button data-ws="imei" title="IMEI Control Center">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 2v16h10V4H7Zm4 14h2v1h-2v-1Z"/></svg>
+        <span>IMEI Control</span>
+      </button>
+      <button data-ws="sources" title="Data sources">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c4.42 0 8 1.34 8 3v12c0 1.66-3.58 3-8 3s-8-1.34-8-3V6c0-1.66 3.58-3 8-3Zm0 2c-3.87 0-6 1.05-6 1.5S8.13 8 12 8s6-1.05 6-1.5S15.87 5 12 5Zm6 4.3c-1.4.82-3.64 1.2-6 1.2s-4.6-.38-6-1.2V12c0 .45 2.13 1.5 6 1.5s6-1.05 6-1.5V9.3Zm0 6c-1.4.82-3.64 1.2-6 1.2s-4.6-.38-6-1.2V18c0 .45 2.13 1.5 6 1.5s6-1.05 6-1.5v-2.7Z"/></svg>
+        <span>Data sources</span>
+      </button>
+    </nav>
+
+    <div class="rail-foot">
+      <div class="rail-live"><i></i><span id="syncstate">connecting…</span></div>
+      <div class="rail-version">v1.0.0 · offline · local</div>
+    </div>
+  </aside>
+
+  <div id="stage">
+    <header id="topbar">
+      <div class="page-id">
+        <span id="ws-eyebrow">Unified fleet overview</span>
+        <h1 id="ws-title">Two ledgers. One device truth.</h1>
+      </div>
+
+      <form id="global-search" autocomplete="off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 0 4.55 13.46l4.25 4.24 1.41-1.41-4.24-4.25A7.5 7.5 0 0 0 10.5 3Zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"/></svg>
+        <input id="gs-q" type="text" placeholder="Search any IMEI or serial across both ledgers" spellcheck="false" autocomplete="off">
+        <button class="primary" type="submit">Inspect</button>
+      </form>
+
+      <div class="topright">
+        <div class="exposure" title="Value attached to open NSpector findings">
+          <span class="ex-label">Open exposure</span>
+          <span class="ex-val" id="top-exposure-val">—</span>
+        </div>
+        <button id="syncbtn" class="ghost" title="Re-ingest NSpector source data">Sync</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ================= OVERVIEW ================= -->
+      <section class="workspace ws-overview active" data-ws="overview">
+        <div id="ov-hero" class="hero">
+          <div class="hero-copy">
+            <span class="eyebrow">Merged workspace</span>
+            <h2>Two ledgers. <em>One device truth.</em></h2>
+            <p id="ov-lede">The NSpector dispatch ledger and the AMAYA IMEI Control Center now answer the same question together: where did this handset actually go?</p>
+            <div class="hero-actions">
+              <button class="primary" data-goto="lookup">Open unified lookup</button>
+              <button data-goto="imei">Enter IMEI Control</button>
+            </div>
+          </div>
+          <div class="merge-orb" id="ov-orb" style="--p:0%">
+            <div class="merge-core"><b id="ov-match-pct">—</b><span>matched IMEIs</span></div>
+          </div>
+        </div>
+
+        <div id="ov-kpis" class="kpi-grid">
+          <div class="kpi skeleton"></div><div class="kpi skeleton"></div>
+          <div class="kpi skeleton"></div><div class="kpi skeleton"></div>
+          <div class="kpi skeleton"></div><div class="kpi skeleton"></div>
+        </div>
+
+        <div class="ov-grid">
+          <div class="panel glass" id="ov-recon">
+            <h3>Ledger reconciliation</h3>
+            <p class="hint">Exact IMEI matches between the NSpector dispatch trail and the AMAYA asset ledger.</p>
+            <div id="ov-recon-body"><p class="hint">Loading reconciliation…</p></div>
+          </div>
+          <div class="panel glass" id="ov-amaya">
+            <h3>IMEI Control Center</h3>
+            <p class="hint">Movement evidence across four source workbooks.</p>
+            <div id="ov-amaya-body"><p class="hint">Loading snapshot…</p></div>
+          </div>
+          <div class="panel glass" id="ov-ns">
+            <h3>NSpector ledger</h3>
+            <p class="hint">Dispatch, returns, dealer custody and exposure.</p>
+            <div id="ov-ns-body"><p class="hint">Loading ledger…</p></div>
+          </div>
+          <div class="panel glass" id="ov-critical">
+            <h3>Highest-priority findings</h3>
+            <p class="hint">Open or investigating findings from the NSpector reasoning engine.</p>
+            <div id="ov-critical-body"><p class="hint">Loading findings…</p></div>
+          </div>
+        </div>
+
+        <div class="panel glass" id="ov-sources">
+          <h3>Evidence base</h3>
+          <p class="hint">Every number in this app comes from a local file. Nothing is fetched at runtime.</p>
+          <div id="ov-sources-body" class="source-grid"></div>
+        </div>
+      </section>
+
+      <!-- ================= UNIFIED LOOKUP ================= -->
+      <section class="workspace ws-lookup" data-ws="lookup">
+        <div class="lookup-hero">
+          <span class="eyebrow">Cross-ledger lookup</span>
+          <h2>One serial. <em>Both evidence trails.</em></h2>
+          <p>Search by IMEI or serial. NSpector contributes custody, returns and reasoning; AMAYA contributes every workbook occurrence, lifecycle state and source citation.</p>
+          <form id="lookup-form" class="lookup-form" autocomplete="off">
+            <input id="lookup-q" type="text" placeholder="864616088906357" inputmode="numeric" spellcheck="false">
+            <button class="primary" type="submit">Open dossier</button>
+          </form>
+          <div class="quicktry" id="lookup-try">
+            <span>Try a known overlap:</span>
+            <button class="chipbtn" data-s="864616088906357">864616088906357</button>
+            <button class="chipbtn" data-s="868436082481166">868436082481166</button>
+            <button class="chipbtn" data-s="359764211948607">359764211948607</button>
+          </div>
+        </div>
+        <div id="lookup-out">
+          <div class="panel glass empty-dossier">
+            <div class="empty-glyph">⌘</div>
+            <h3>Nothing opened yet</h3>
+            <p class="hint">Enter a serial above, or pick one of the overlap examples. The dossier will show which ledgers hold the device and what each one says.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= DEVICES (NSpector) ================= -->
+      <section class="workspace ws-devices" data-ws="devices">
+        <div class="ws-head">
+          <div>
+            <span class="eyebrow">NSpector workspace</span>
+            <h2>Device ledger & reasoning</h2>
+          </div>
+          <span class="source-pill">NSpector CSV ledgers</span>
+        </div>
+
+        <nav id="tabs">
+          <button data-tab="queue" class="active">Work Queue</button>
+          <button data-tab="inspect">Inspector</button>
+          <button data-tab="exposure">Exposure</button>
+          <button data-tab="chains">Flows</button>
+          <button data-tab="dealers">Dealers</button>
+          <button data-tab="ownership">Ownership</button>
+        </nav>
+
+        <section id="queue" class="view active">
+          <div class="filters">
+            <select id="fq-status">
+              <option value="">Any status</option>
+              <option value="open">Open</option>
+              <option value="investigating">Investigating</option>
+              <option value="resolved">Resolved</option>
+              <option value="dismissed">Dismissed</option>
+            </select>
+            <select id="fq-sev">
+              <option value="">Any severity</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <select id="fq-kind">
+              <option value="">Any finding</option>
+              <option value="duplicate_cross">Duplicate — two dealers</option>
+              <option value="duplicate_multi">Duplicate — three or more</option>
+              <option value="orphan_return">Returned, never dispatched</option>
+              <option value="imei_lock">IMEI lock or mismatch</option>
+              <option value="no_serial_return">Return with no serial</option>
+              <option value="luhn_invalid">Fails check digit</option>
+              <option value="tac_conflict">Prefix / model conflict</option>
+            </select>
+            <input id="fq-owner" type="text" placeholder="Filter by owner" autocomplete="off">
+            <input id="fq-min" type="number" placeholder="Min value" min="0" step="5000" autocomplete="off">
+            <button id="fq-clear" class="ghost">Clear</button>
+          </div>
+          <div id="queue-stats" class="statbar"></div>
+          <div id="queue-list" class="cards"></div>
+          <div class="loadmore"><button id="q-more">Load more</button></div>
+        </section>
+
+        <section id="inspect" class="view">
+          <div class="panel">
+            <h3>Serial inspector</h3>
+            <p class="hint">Enter a 15-digit IMEI or any serial to get its full trail, the reasoning behind any finding, and the evidence behind it.</p>
+            <div class="searchbar">
+              <input id="ins-q" type="text" placeholder="864616088906357" autocomplete="off" spellcheck="false">
+              <button id="ins-go" class="primary">Inspect</button>
+            </div>
+            <div class="quicktry">
+              <span>try:</span>
+              <button class="chipbtn" data-s="864616088906357">a duplicate</button>
+              <button class="chipbtn" data-s="868436082481166">an IMEI lock</button>
+              <button class="chipbtn" data-s="359764211948607">three dealers</button>
+            </div>
+          </div>
+          <div id="ins-out"></div>
+        </section>
+
+        <section id="exposure" class="view">
+          <div id="exp-cards" class="grid"></div>
+          <div class="panel">
+            <h3>Where the exposure sits</h3>
+            <p class="hint">Value is taken from prices actually observed on your own return records — nothing here is an estimate.</p>
+            <div id="exp-sev" class="chart"></div>
+          </div>
+          <div class="panel">
+            <h3>Root cause — diagnosed</h3>
+            <p class="hint">What the evidence actually points to, across every finding.</p>
+            <div id="exp-diag" class="chart"></div>
+          </div>
+          <div class="panel">
+            <h3>Highest value items</h3>
+            <div id="exp-top" class="cards"></div>
+          </div>
+          <div class="panel">
+            <h3>Price book</h3>
+            <p class="hint">Built from your logged returns. Families with no observed price are shown as unpriced rather than assumed to be zero.</p>
+            <div id="exp-book" class="chart"></div>
+          </div>
+        </section>
+
+        <section id="chains" class="view">
+          <div class="panel">
+            <h3>Repeated dealer-to-dealer flows</h3>
+            <p class="hint">The same serials passing through the same pair of dealers, over and over. That is not random noise — treat each of these as one structural issue, not N separate duplicates.</p>
+            <div id="chain-list" class="cards"></div>
+          </div>
+        </section>
+
+        <section id="dealers" class="view">
+          <div class="filters">
+            <input id="dl-search" type="text" placeholder="Search dealer name or alias" autocomplete="off">
+          </div>
+          <div id="dealer-list" class="cards"></div>
+        </section>
+
+        <section id="ownership" class="view">
+          <div id="own-cards" class="grid"></div>
+          <div class="panel">
+            <h3>Finding types</h3>
+            <div id="own-kinds" class="chart"></div>
+          </div>
+          <div class="panel">
+            <h3>How this is meant to be used</h3>
+            <p class="hint">Each finding is a reporting item, not an accusation. A duplicate is almost always an unclosed return, not theft. What matters is that somebody is accountable for closing it.</p>
+            <ul class="steps">
+              <li><b>Open</b> — generated, nobody has looked at it</li>
+              <li><b>Investigating</b> — someone is checking it against the physical unit</li>
+              <li><b>Resolved</b> — action taken, note recorded against the finding</li>
+              <li><b>Dismissed</b> — checked and explained, no action needed</li>
+            </ul>
+          </div>
+        </section>
+      </section>
+
+      <!-- ================= IMEI CONTROL (AMAYA native) ================= -->
+      <section class="workspace ws-imei" data-ws="imei">
+        <div class="ws-head">
+          <div>
+            <span class="eyebrow">AMAYA workspace</span>
+            <h2>IMEI Control Center</h2>
+          </div>
+          <div class="frame-actions">
+            <span class="frame-note" id="frame-note">68,346 assets · 103,648 movement events</span>
+            <button id="frame-reload" class="ghost">Reload</button>
+            <button id="openAmaWindow" class="ghost">Open →</button>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <div class="stat-card">
+            <div class="icon">⚡</div>
+            <div class="label">Unique Assets</div>
+            <div class="value">68,346</div>
+            <div class="sub">one-row deduplicated ledger</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">↩︎</div>
+            <div class="label">Repeated IDs</div>
+            <div class="value">25,1K</div>
+            <div class="present in 2+ source tabs"></div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">📊</div>
+            <div class="label">Movement Conflicts</div>
+            <div class="value">9.6K</div>
+            <div class="states disagree across evidence"></div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">⚠️</div>
+            <div class="label">No Terminal State</div>
+            <div class="value">58.7K</div>
+            <div class="of the ledger cannot be resolved"></div>
+          </div>
+        </div>
+        <div class="review-summary">
+          <div>58,756 outside the review queue</div>
+          <div>6 empty tabs</div>
+        </div>
+        <div class="section-header">LATEST RESOLVED STATE</div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="num">43,958</div>
+            <div class="label">Unknown</div>
+            <div class="pct">64.3%</div>
+          </div>
+          <div class="kpi">
+            <div class="num">15,309</div>
+            <div class="label">Stock Transfer</div>
+            <div class="pct">22.4%</div>
+          </div>
+          <div class="kpi">
+            <div class="num">8,912</div>
+            <div class="label">Sold Delivered</div>
+            <div class="pct">13.0%</div>
+          </div>
+          <div class="kpi">
+            <div class="num">110</div>
+            <div class="label">Service</div>
+            <div class="pct">0.2%</div>
+          </div>
+          <div class="kpi">
+            <div class="num">54</div>
+            <div class="label">Return</div>
+            <div class="pct">0.1%</div>
+          </div>
+          <div class="kpi">
+            <div class="num">2</div>
+            <div class="label">Bad Bin</div>
+            <div class="pct">0.0%</div>
+          </div>
+          <div class="kpi">
+            <div class="num">1</div>
+            <div class="label">Pending Hold</div>
+            <div class="pct">0.0%</div>
+          </div>
+        </div>
+        <div class="section-header">One device. One defensible story.</div>
+        <p>Turn repeated IMEI appearances into a traceable movement record — and make every unresolved conflict visible before it becomes a reporting error.</p>
+        <button class="primary" id="openAmaWindow">Open full Control Center →</button>
+      </section>
+
+      <!-- ================= SOURCES ================= -->
+      <section class="workspace ws-sources" data-ws="sources">
+        <div class="ws-head">
+          <div>
+            <span class="eyebrow">Provenance</span>
+            <h2>Data sources & methodology</h2>
+          </div>
+          <span class="source-pill" id="src-data-version">AMAYA snapshot</span>
+        </div>
+        <div id="sources-out"><div class="panel glass"><p class="hint">Loading source inventory…</p></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ================= FINDING SHEET ================= -->
+<div id="sheet" class="sheet">
+  <div class="sheet-inner">
+    <div class="sheet-head">
+      <h2 id="sh-title">Finding</h2>
+      <button id="sh-close" class="ghost">Close</button>
+    </div>
+    <div id="sh-body" class="sheet-body"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="nspector.js"></script>
+<script src="shell.js"></script>
+</body>
+</html>
