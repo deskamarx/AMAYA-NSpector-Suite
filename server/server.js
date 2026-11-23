@@ -22,8 +22,7 @@ const ROOT = path.join(__dirname, '..');
 const WEB = path.join(ROOT, 'web');
 const DATA = process.env.NSPECTOR_DATA || path.join(ROOT, 'data');
 // On read-only filesystems (e.g., Render), use /tmp for the database
-const isReadOnly = process.env.RENDER === 'true' || process.env.RENDER_SERVICE_ID;
-const DBFILE = process.env.NSPECTOR_DB || (isReadOnly ? '/tmp/nspector.db' : path.join(ROOT, 'nspector.db'));
+const DBFILE = process.env.NSPECTOR_DB || '/tmp/nspector.db';
 const AMAYA_DIR = process.env.AMAYA_DIR || path.join(ROOT, 'vendor', 'amaya');
 
 let db;
