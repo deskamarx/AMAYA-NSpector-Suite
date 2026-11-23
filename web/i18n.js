@@ -5,6 +5,8 @@
   'use strict';
 
   const STORAGE_KEY = 'imei.locale.v1';
+  const CHANNEL = 'amaya-suite-locale';
+  const SOURCE_ID = 'suite-' + Math.random().toString(36).slice(2);
   const INTL = { en: 'en-IN', bn: 'bn-BD', zh: 'zh-CN' };
   const MONEY = { en: 'Tk ', bn: '৳ ', zh: 'Tk ' };
   const COMPACT = {
@@ -41,6 +43,16 @@
     'top.syncAria': 'Sync — re-ingest NSpector source data',
     'top.syncing': 'Syncing…',
     'top.language': 'Language',
+    'tip.kpi.merged': 'Open unified lookup',
+    'tip.kpi.matched': 'Inspect matched devices',
+    'tip.kpi.findings': 'Open NSpector findings',
+    'tip.kpi.conflicts': 'Open AMAYA conflicts',
+    'tip.kpi.serials': 'Open NSpector serial ledger',
+    'tip.kpi.assets': 'Open AMAYA asset ledger',
+    'tip.src.nspector': 'Open NSpector devices',
+    'tip.src.amaya': 'Open AMAYA workspace',
+    'tip.src.merged': 'Search the merged ledger',
+    'tip.control': 'Open the full IMEI Control Center',
 
     'search.globalPlaceholder': 'Search any IMEI or serial across both ledgers',
     'search.globalAria': 'Search IMEI or serial across both ledgers',
@@ -211,6 +223,16 @@
     'top.syncAria': 'সিঙ্ক — NSpector উৎস তথ্য পুনরায় আমদানি করুন',
     'top.syncing': 'সিঙ্ক হচ্ছে…',
     'top.language': 'ভাষা',
+    'tip.kpi.merged': 'একীকৃত অনুসন্ধান খুলুন',
+    'tip.kpi.matched': 'মিলিত ডিভাইস পরীক্ষা করুন',
+    'tip.kpi.findings': 'NSpector ফলাফল খুলুন',
+    'tip.kpi.conflicts': 'AMAYA দ্বন্দ্ব খুলুন',
+    'tip.kpi.serials': 'NSpector সিরিয়াল তালিকা খুলুন',
+    'tip.kpi.assets': 'AMAYA সম্পদ তালিকা খুলুন',
+    'tip.src.nspector': 'NSpector ডিভাইস খুলুন',
+    'tip.src.amaya': 'AMAYA কর্মক্ষেত্র খুলুন',
+    'tip.src.merged': 'একীকৃত তালিকায় খুঁজুন',
+    'tip.control': 'সম্পূর্ণ IMEI কন্ট্রোল সেন্টার খুলুন',
 
     'search.globalPlaceholder': 'দুই লেজারে যেকোনো IMEI বা সিরিয়াল খুঁজুন',
     'search.globalAria': 'দুই লেজারে IMEI বা সিরিয়াল খুঁজুন',
@@ -381,6 +403,16 @@
     'top.syncAria': '同步 — 重新导入 NSpector 源数据',
     'top.syncing': '同步中…',
     'top.language': '语言',
+    'tip.kpi.merged': '打开统一查询',
+    'tip.kpi.matched': '查看匹配设备',
+    'tip.kpi.findings': '打开 NSpector 发现项',
+    'tip.kpi.conflicts': '打开 AMAYA 冲突',
+    'tip.kpi.serials': '打开 NSpector 序列号台账',
+    'tip.kpi.assets': '打开 AMAYA 资产台账',
+    'tip.src.nspector': '打开 NSpector 设备',
+    'tip.src.amaya': '打开 AMAYA 工作区',
+    'tip.src.merged': '搜索合并台账',
+    'tip.control': '打开完整 IMEI 控制中心',
 
     'search.globalPlaceholder': '在两套台账中搜索任意 IMEI 或序列号',
     'search.globalAria': '在两套台账中搜索 IMEI 或序列号',
@@ -571,8 +603,8 @@
     'dossier.checkInvalid': 'check digit invalid', 'dossier.conflict': 'AMAYA conflict',
     'dossier.repeat': 'repeat ID', 'dossier.openNs': 'Open in NSpector inspector',
     'dossier.copy': 'Copy for Control Center',
-    'dossier.copyHint': 'Serial copied — paste it into the Control Center search.',
-    'dossier.copyFallback': 'Control Center opened — copy the serial above to continue.',
+    'dossier.copyHint': 'Serial copied — Control Center opened on its evidence trail.',
+    'dossier.copyFallback': 'Control Center opened on its evidence trail — copy the serial above if needed.',
     'dossier.nsTitle': 'NSpector', 'dossier.nsSub': 'Custody, returns & reasoning',
     'dossier.amTitle': 'AMAYA IMEI Control Center', 'dossier.amSub': 'Workbook occurrences & lifecycle',
     'dossier.noNs': 'Not present in the NSpector dispatch ledger or returns.',
@@ -605,6 +637,7 @@
     'control.popups': 'Allow pop-ups to open the Control Center',
     'control.reloaded': 'Control Center window reloaded',
     'control.refreshed': 'Snapshot metrics refreshed',
+    'toast.localeChanged': 'Language updated across the suite',
     'ama.unavailable': 'Snapshot unavailable', 'ama.metrics': 'Metrics could not be loaded.',
     'ama.unique': 'Unique Assets', 'ama.uniqueSub': 'one-row deduplicated ledger',
     'ama.repeat': 'Repeated IDs', 'ama.repeatSub': 'present in 2+ source tabs',
@@ -680,8 +713,8 @@
     'dossier.checkInvalid': 'চেক ডিজিট অবৈধ', 'dossier.conflict': 'AMAYA দ্বন্দ্ব',
     'dossier.repeat': 'পুনরাবৃত্তি আইডি', 'dossier.openNs': 'NSpector পরিদর্শকতে খুলুন',
     'dossier.copy': 'কন্ট্রোল সেন্টারের জন্য কপি',
-    'dossier.copyHint': 'সিরিয়াল কপি হয়েছে — কন্ট্রোল সেন্টারের অনুসন্ধানে পেস্ট করুন।',
-    'dossier.copyFallback': 'কন্ট্রোল সেন্টার খোলা হয়েছে — চালিয়ে যেতে উপরের সিরিয়ালটি কপি করুন।',
+    'dossier.copyHint': 'সিরিয়াল কপি হয়েছে — কন্ট্রোল সেন্টার তার প্রমাণ-পথে খোলা হয়েছে।',
+    'dossier.copyFallback': 'কন্ট্রোল সেন্টার প্রমাণ-পথে খোলা হয়েছে — প্রয়োজনে উপরের সিরিয়ালটি কপি করুন।',
     'dossier.nsTitle': 'NSpector', 'dossier.nsSub': 'দখল, রিটার্ন ও যুক্তি',
     'dossier.amTitle': 'AMAYA IMEI কন্ট্রোল সেন্টার', 'dossier.amSub': 'ওয়ার্কবুক উপস্থিতি ও জীবনচক্র',
     'dossier.noNs': 'NSpector ডিসপাচ লেজার বা রিটার্নে নেই।',
@@ -714,6 +747,7 @@
     'control.popups': 'কন্ট্রোল সেন্টার খুলতে পপ-অ্যাপ অনুমোদন করুন',
     'control.reloaded': 'কন্ট্রোল সেন্টার উইন্ডো রিলোড হয়েছে',
     'control.refreshed': 'স্ন্যাপশট মেট্রিক রিফ্রেশ হয়েছে',
+    'toast.localeChanged': 'সম্পূর্ণ স্যুতে ভাষা হালনাগাদ হয়েছে',
     'ama.unavailable': 'স্ন্যাপশট পাওয়া যায়নি', 'ama.metrics': 'মেট্রিক লোড করা যায়নি।',
     'ama.unique': 'স্বতন্ত্র সম্পদ', 'ama.uniqueSub': 'এক-সারির ডুপ্লিকেট-মুছে ফেলা তালিকা',
     'ama.repeat': 'পুনরাবৃত্ত আইডি', 'ama.repeatSub': '২+ উৎস ট্যাবে উপস্থিত',
@@ -789,8 +823,8 @@
     'dossier.checkInvalid': '校验位无效', 'dossier.conflict': 'AMAYA 冲突',
     'dossier.repeat': '重复 ID', 'dossier.openNs': '在 NSpector 检查器中打开',
     'dossier.copy': '复制到控制中心',
-    'dossier.copyHint': '序列号已复制 — 请粘贴到控制中心搜索框。',
-    'dossier.copyFallback': '控制中心已打开 — 请复制上方序列号以继续。',
+    'dossier.copyHint': '序列号已复制 — 控制中心已直接打开其证据链。',
+    'dossier.copyFallback': '控制中心已直接打开证据链 — 如需请复制上方序列号。',
     'dossier.nsTitle': 'NSpector', 'dossier.nsSub': '保管、退货与推理',
     'dossier.amTitle': 'AMAYA IMEI 控制中心', 'dossier.amSub': '工作表出现与生命周期',
     'dossier.noNs': '不在 NSpector 发货台账或退货记录中。',
@@ -823,6 +857,7 @@
     'control.popups': '请允许弹出窗口以打开控制中心',
     'control.reloaded': '控制中心窗口已重新载入',
     'control.refreshed': '快照指标已刷新',
+    'toast.localeChanged': '整套系统中的语言已更新',
     'ama.unavailable': '快照不可用', 'ama.metrics': '指标无法载入。',
     'ama.unique': '不重复资产', 'ama.uniqueSub': '单行去重台账',
     'ama.repeat': '重复 ID', 'ama.repeatSub': '出现在 2 个以上源工作表',
@@ -1337,6 +1372,7 @@
     set('data-i18n-html', (el, k) => { el.innerHTML = tHtml(k); });
     set('data-i18n-aria', (el, k) => { el.setAttribute('aria-label', t(k)); });
     set('data-i18n-title', (el, k) => { el.title = t(k); });
+    set('data-i18n-tip', (el, k) => { el.setAttribute('data-tip', t(k)); });
     set('data-i18n-content', (el, k) => { el.setAttribute('content', t(k)); });
     set('data-i18n-placeholder', (el, k) => { el.placeholder = t(k); });
     const sel = document.getElementById('locale-select');
@@ -1349,8 +1385,63 @@
     }
   }
 
-  function setLocale(next) {
+  function normalize(value) {
+    const s = String(value == null ? '' : value).toLowerCase();
+    if (s.indexOf('bn') === 0) return 'bn';
+    if (s.indexOf('zh') === 0) return 'zh';
+    if (s.indexOf('en') === 0) return 'en';
+    return '';
+  }
+
+  let channel = null;
+  try {
+    if (typeof BroadcastChannel === 'function') channel = new BroadcastChannel(CHANNEL);
+  } catch (e) {}
+
+  // One language choice drives the shell, NSpector, and the full Control Center.
+  // Proper nouns and record identifiers are never touched: only UI strings change.
+  function broadcastLocale(next) {
+    const payload = { type: 'suite:locale', source: SOURCE_ID, locale: next };
+    try { if (channel) channel.postMessage(payload); } catch (e) {}
+    try {
+      if (global.amayaShellLocale && global.amayaShellLocale.set) global.amayaShellLocale.set(next);
+    } catch (e) {}
+  }
+
+  function receiveLocale(value) {
+    const next = normalize(value);
+    if (!next || next === locale) return;
+    setLocale(next, { broadcast: false });
+  }
+
+  try {
+    if (channel) channel.onmessage = e => {
+      const data = e && e.data;
+      if (data && data.source !== SOURCE_ID) receiveLocale(data.locale);
+    };
+  } catch (e) {}
+  try {
+    window.addEventListener('message', e => {
+      if (!e || e.origin !== location.origin) return;
+      const data = e.data;
+      if (data && data.type === 'suite:locale' && data.source !== SOURCE_ID) receiveLocale(data.locale);
+    });
+  } catch (e) {}
+  try {
+    window.addEventListener('storage', e => {
+      if (e && e.key === STORAGE_KEY) receiveLocale(e.newValue);
+    });
+  } catch (e) {}
+  try {
+    if (global.amayaShellLocale && global.amayaShellLocale.onChange) {
+      global.amayaShellLocale.onChange(receiveLocale);
+    }
+  } catch (e) {}
+
+  function setLocale(next, opts) {
+    next = normalize(next);
     if (!DICT[next]) return;
+    opts = opts || {};
     locale = next;
     try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
     apply(document);
@@ -1359,6 +1450,7 @@
     } catch (e) {
       window.dispatchEvent(new Event('suite:localechange'));
     }
+    if (opts.broadcast !== false) broadcastLocale(next);
   }
 
   const DICT = { en, bn, zh };

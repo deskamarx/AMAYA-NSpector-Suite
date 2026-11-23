@@ -298,19 +298,19 @@
     $('#ov-match-pct').textContent = pctBoth.toFixed(1) + '%';
 
     const kpis = [
-      [t('kpi.distinct'), num(ov.union), t('kpi.distinctSub'), 'merged', ''],
-      [t('kpi.matched'), num(ov.both), t('kpi.matchedSub', { ns:num(ov.nsOnly), am:num(ov.amayaOnly) }), 'both', ''],
-      [t('kpi.findings'), num(st.openFindings), t('kpi.findingsSub', { total:num(st.findings), value:tb(ex.open_total) }), 'nspector', 'crit'],
-      [t('kpi.conflicts'), num(a.conflicts), t('kpi.conflictsSub', { repeat:num(a.repeatIds), review:num(a.reviewQueue) }), 'amaya', 'warn'],
-      [t('kpi.serials'), num(st.uniqueSerials), t('kpi.serialsSub', { disp:num(st.dispatches), dealers:num(st.dealers) }), 'nspector', ''],
-      [t('kpi.assets'), num(a.assets), t('kpi.assetsSub', { events:num(a.events), books:num(Object.keys(a.sources || {}).length) }), 'amaya', 'acc']
+      [t('kpi.distinct'), num(ov.union), t('kpi.distinctSub'), 'merged', '', 'lookup', 'tip.kpi.merged'],
+      [t('kpi.matched'), num(ov.both), t('kpi.matchedSub', { ns:num(ov.nsOnly), am:num(ov.amayaOnly) }), 'both', '', 'lookup', 'tip.kpi.matched'],
+      [t('kpi.findings'), num(st.openFindings), t('kpi.findingsSub', { total:num(st.findings), value:tb(ex.open_total) }), 'nspector', 'crit', 'devices', 'tip.kpi.findings'],
+      [t('kpi.conflicts'), num(a.conflicts), t('kpi.conflictsSub', { repeat:num(a.repeatIds), review:num(a.reviewQueue) }), 'amaya', 'warn', 'imei', 'tip.kpi.conflicts'],
+      [t('kpi.serials'), num(st.uniqueSerials), t('kpi.serialsSub', { disp:num(st.dispatches), dealers:num(st.dealers) }), 'nspector', '', 'devices', 'tip.kpi.serials'],
+      [t('kpi.assets'), num(a.assets), t('kpi.assetsSub', { events:num(a.events), books:num(Object.keys(a.sources || {}).length) }), 'amaya', 'acc', 'imei', 'tip.kpi.assets']
     ];
-    $('#ov-kpis').innerHTML = kpis.map(([label, value, sub, source, tone]) => `
-      <div class="kpi ${tone}">
+    $('#ov-kpis').innerHTML = kpis.map(([label, value, sub, source, tone, go, tipKey]) => `
+      <button type="button" class="kpi ${tone}" data-goto="${go}" data-tip="${esc(t(tipKey))}" title="${esc(t(tipKey))}">
         <div class="kpi-top"><span>${esc(label)}</span><i class="src-dot ${source}"></i></div>
         <strong>${value}</strong>
         <small>${esc(sub)}</small>
-      </div>`).join('');
+      </button>`).join('');
 
     // reconciliation
     const rows = [
@@ -387,12 +387,12 @@
 
     // sources strip
     const srcCards = [
-      [t('src.ns'), t('src.nsBig', { n:num(st.dispatches) }), t('src.nsSub'), 'nspector', 'devices'],
-      [t('src.am'), t('src.amBig', { assets:num(a.assets), events:num(a.events) }), t('src.amSub', { file:a.generatedFrom || 'imei_deduplicated_ledger.xlsx' }), 'amaya', 'imei'],
-      [t('src.merged'), t('src.mergedBig', { n:num(ov.both) }), t('src.mergedSub'), 'both', 'lookup']
+      [t('src.ns'), t('src.nsBig', { n:num(st.dispatches) }), t('src.nsSub'), 'nspector', 'devices', 'tip.src.nspector'],
+      [t('src.am'), t('src.amBig', { assets:num(a.assets), events:num(a.events) }), t('src.amSub', { file:a.generatedFrom || 'imei_deduplicated_ledger.xlsx' }), 'amaya', 'imei', 'tip.src.amaya'],
+      [t('src.merged'), t('src.mergedBig', { n:num(ov.both) }), t('src.mergedSub'), 'both', 'lookup', 'tip.src.merged']
     ];
-    $('#ov-sources-body').innerHTML = srcCards.map(([title, big, sub, cls, go]) => `
-      <button class="source-card" data-goto="${go}">
+    $('#ov-sources-body').innerHTML = srcCards.map(([title, big, sub, cls, go, tipKey]) => `
+      <button class="source-card" data-goto="${go}" data-tip="${esc(t(tipKey))}" title="${esc(t(tipKey))}">
         <span class="src-dot ${cls}"></span>
         <b>${esc(title)}</b>
         <strong>${esc(big)}</strong>
@@ -531,7 +531,7 @@
         }
       } catch (e) { /* insecure context or denied permission */ }
       showWorkspace('imei');
-      if (window.SuiteOpenControlCenter) window.SuiteOpenControlCenter(true);
+      if (window.SuiteOpenControlCenter) window.SuiteOpenControlCenter({ serial:s, silent:true });
       toast(copied
         ? t('dossier.copyHint', {}, 'Serial copied — paste it into the Control Center search.')
         : t('dossier.copyFallback', {}, 'Control Center opened — copy the serial above to continue.'),
@@ -665,13 +665,23 @@
   // ---------------------------------------------------------------- AMAYA workspace
   const AMA_PATH = '/amaya-imei-control-center/';
 
-  function openControlCenter(silent) {
+  function evidenceHash(serial) {
+    const digits = String(serial || '').replace(/\D/g, '');
+    return /^\d{14,15}$/.test(digits) ? '#/evidence/' + digits : '';
+  }
+
+  function openControlCenter(options) {
+    if (typeof options === 'string') options = { serial: options };
+    else if (typeof options === 'boolean') options = { silent: options };
+    options = options || {};
+    const hash = evidenceHash(options.serial);
+    const silent = !!options.silent;
     if (desktop && window.amayaShell.openControlCenter) {
-      Promise.resolve(window.amayaShell.openControlCenter())
+      Promise.resolve(window.amayaShell.openControlCenter(hash))
         .then(ok => { if (!silent) toast(ok ? t('control.window') : t('control.failed'), ok ? 'success' : 'error'); })
         .catch(() => { if (!silent) toast(t('control.failed'), 'error'); });
     } else {
-      const w = window.open(AMA_PATH, '_blank');
+      const w = window.open(AMA_PATH + hash, '_blank');
       if (w) { try { w.opener = null; } catch (e) {} }
       if (!silent) toast(w ? t('control.tab') : t('control.popups'), w ? 'success' : 'warn');
     }
@@ -823,9 +833,7 @@
   window.addEventListener('suite:localechange', () => {
     showWorkspace(current, true);
     if (lookupDossier) renderDossier(lookupDossier);
-    if (desktop && window.amayaShell.reloadControlCenter) {
-      Promise.resolve(window.amayaShell.reloadControlCenter()).catch(() => {});
-    }
+    toast(t('toast.localeChanged'), 'success');
   });
 
   const initial = (location.hash || '').replace('#', '');

@@ -447,7 +447,7 @@ button.ghost { background:transparent; }
   border:1px solid var(--line);
   border-radius:var(--r-sm);
   background:linear-gradient(165deg, rgba(20, 30, 50, .7), rgba(8, 13, 24, .68));
-  overflow:hidden;
+  overflow:visible;
 }
 .kpi::after {
   content:"";
@@ -1328,7 +1328,10 @@ body.sheet-open { overflow:hidden; }
 }
 .locale-picker option { background:#0b1321; color:var(--fg); }
 .locale-picker:hover { border-color:var(--line2); background:rgba(255, 255, 255, .06); }
-.locale-picker:hover svg { fill:var(--fg); }
+.locale-picker:hover svg,
+.locale-picker:hover::after,
+.locale-picker:focus-within::after { fill:var(--fg); color:var(--fg); }
+.locale-picker:active { transform:translateY(1px); }
 .locale-picker:focus-within {
   border-color:rgba(167, 139, 250, .65);
   box-shadow:0 0 0 3px rgba(167, 139, 250, .12);
@@ -1338,6 +1341,88 @@ body.sheet-open { overflow:hidden; }
 .locale-picker + .exposure {
   padding-left:11px;
   border-left:1px solid var(--line);
+}
+
+/* ------------------------------------------------ tactile 3D interaction layer */
+.kpi-grid, .src-grid-inner, .frame-grid { perspective:900px; }
+.kpi, .source-card, .stat-card, .method-card { transform-style:preserve-3d; }
+button.kpi {
+  appearance:none;
+  width:100%;
+  font:inherit;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.kpi, .source-card, .stat-card, .method-card, .wide-btn, .ghost, .primary {
+  transition:
+    transform .22s cubic-bezier(.2, .8, .2, 1),
+    box-shadow .22s ease,
+    border-color .16s ease,
+    background .16s ease,
+    color .16s ease;
+}
+.kpi:hover, .source-card:hover, .stat-card:hover {
+  transform:translateY(-3px) rotateX(1.4deg) rotateY(-1.2deg);
+  box-shadow:0 14px 30px rgba(0, 0, 0, .3);
+}
+.kpi:active, .source-card:active, .stat-card:active {
+  transform:translateY(-1px) scale(.995);
+}
+.kpi:focus-visible, .source-card:focus-visible, .stat-card:focus-visible {
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+#railnav button svg, .rail-brand .brand-mark, .locale-picker svg {
+  transition:transform .24s cubic-bezier(.2, .8, .2, 1);
+}
+#railnav button:hover svg { transform:translateX(2px) scale(1.08); }
+.rail-brand:hover .brand-mark { transform:rotate(-6deg) scale(1.04); }
+.locale-picker:hover svg { transform:rotate(8deg); }
+@keyframes card-rise {
+  from { opacity:0; transform:translateY(10px) rotateX(3deg); }
+  to   { opacity:1; transform:none; }
+}
+.workspace.active .kpi { animation:card-rise .42s cubic-bezier(.2, .8, .2, 1) both; }
+.workspace.active .kpi:nth-child(2) { animation-delay:.04s; }
+.workspace.active .kpi:nth-child(3) { animation-delay:.08s; }
+.workspace.active .kpi:nth-child(4) { animation-delay:.12s; }
+.workspace.active .kpi:nth-child(5) { animation-delay:.16s; }
+.workspace.active .kpi:nth-child(6) { animation-delay:.2s; }
+
+/* Accessible hover text: title/aria stay the source of truth for screen readers. */
+[data-tip] { position:relative; }
+[data-tip]::after {
+  content:attr(data-tip);
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 8px);
+  transform:translate(-50%, 5px) scale(.96);
+  padding:5px 8px;
+  border:1px solid var(--line2);
+  border-radius:7px;
+  background:#111a2b;
+  color:var(--fg);
+  box-shadow:0 8px 20px rgba(0, 0, 0, .34);
+  font:500 10.5px/1.25 var(--font-sans);
+  white-space:nowrap;
+  pointer-events:none;
+  opacity:0;
+  z-index:60;
+  transition:opacity .16s ease, transform .18s cubic-bezier(.2, .8, .2, 1);
+}
+[data-tip]:hover::after, [data-tip]:focus-visible::after {
+  opacity:1;
+  transform:translate(-50%, 0) scale(1);
+}
+#railnav [data-tip]::after, .rail-shortcuts[data-tip]::after {
+  left:calc(100% + 12px);
+  bottom:50%;
+  transform:translate(-4px, 50%) scale(.96);
+}
+#railnav [data-tip]:hover::after, #railnav [data-tip]:focus-visible::after,
+.rail-shortcuts[data-tip]:hover::after, .rail-shortcuts[data-tip]:focus-visible::after {
+  transform:translate(0, 50%) scale(1);
 }
 
 .kpi-grid { align-items:stretch; }
@@ -1480,6 +1565,10 @@ body.sheet-open { overflow:hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+  .kpi:hover, .source-card:hover, .stat-card:hover,
+  .kpi:active, .source-card:active, .stat-card:active,
+  #railnav button:hover svg, .rail-brand:hover .brand-mark, .locale-picker:hover svg { transform:none !important; }
+  .workspace.active .kpi { animation:none !important; }
 }
 
 /* Arrow glyphs are decorative: keep them out of accessible names. */

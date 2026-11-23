@@ -32,23 +32,23 @@
     </button>
 
     <nav id="railnav" data-i18n-aria="nav.workspaces" aria-label="Workspaces">
-      <button data-ws="overview" class="active" data-i18n-title="nav.overview" data-i18n-aria="nav.overview" title="Overview" aria-label="Overview" aria-current="page">
+      <button data-ws="overview" class="active" data-i18n-title="nav.overview" data-i18n-tip="nav.overview" data-i18n-aria="nav.overview" title="Overview" aria-label="Overview" aria-current="page">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
         <span data-i18n="nav.overview">Overview</span>
       </button>
-      <button data-ws="lookup" data-i18n-title="nav.lookup" data-i18n-aria="nav.lookup" title="Unified lookup" aria-label="Unified lookup">
+      <button data-ws="lookup" data-i18n-title="nav.lookup" data-i18n-tip="nav.lookup" data-i18n-aria="nav.lookup" title="Unified lookup" aria-label="Unified lookup">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 0 4.55 13.46l4.25 4.24 1.41-1.41-4.24-4.25A7.5 7.5 0 0 0 10.5 3Zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"/></svg>
         <span data-i18n="nav.lookup">Unified lookup</span>
       </button>
-      <button data-ws="devices" data-i18n-title="nav.devices" data-i18n-aria="nav.devices" title="Device ledger" aria-label="Device ledger">
+      <button data-ws="devices" data-i18n-title="nav.devices" data-i18n-tip="nav.devices" data-i18n-aria="nav.devices" title="Device ledger" aria-label="Device ledger">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 5h16v3H4V9Zm0 5h10v3H4v-3Zm0 5h10v2H4v-2Zm12 0h4v2h-4v-2Z"/></svg>
         <span data-i18n="nav.devices">Device ledger</span>
       </button>
-      <button data-ws="imei" data-i18n-title="nav.imei" data-i18n-aria="nav.imei" title="IMEI Control Center" aria-label="IMEI Control Center">
+      <button data-ws="imei" data-i18n-title="nav.imei" data-i18n-tip="nav.imei" data-i18n-aria="nav.imei" title="IMEI Control Center" aria-label="IMEI Control Center">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 2v16h10V4H7Zm4 14h2v1h-2v-1Z"/></svg>
         <span data-i18n="nav.imeiShort">IMEI Control</span>
       </button>
-      <button data-ws="sources" data-i18n-title="nav.sources" data-i18n-aria="nav.sources" title="Data sources" aria-label="Data sources">
+      <button data-ws="sources" data-i18n-title="nav.sources" data-i18n-tip="nav.sources" data-i18n-aria="nav.sources" title="Data sources" aria-label="Data sources">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c4.42 0 8 1.34 8 3v12c0 1.66-3.58 3-8 3s-8-1.34-8-3V6c0-1.66 3.58-3 8-3Zm0 2c-3.87 0-6 1.05-6 1.5S8.13 8 12 8s6-1.05 6-1.5S15.87 5 12 5Zm6 4.3c-1.4.82-3.64 1.2-6 1.2s-4.6-.38-6-1.2V12c0 .45 2.13 1.5 6 1.5s6-1.05 6-1.5V9.3Zm0 6c-1.4.82-3.64 1.2-6 1.2s-4.6-.38-6-1.2V18c0 .45 2.13 1.5 6 1.5s6-1.05 6-1.5v-2.7Z"/></svg>
         <span data-i18n="nav.sources">Data sources</span>
       </button>
@@ -315,7 +315,7 @@
             <div class="frame-actions">
             <span class="frame-note" id="frame-note" data-i18n="ov.amaya.loading">Loading snapshot…</span>
             <button id="frame-reload" class="ghost" data-i18n-title="imei.reloadTitle" data-i18n-aria="imei.reloadAria" title="Refresh snapshot data" aria-label="Reload — refresh snapshot data"><span data-i18n="imei.reload">Reload</span></button>
-            <button class="ghost open-ama" data-i18n-title="imei.openFullTitle" data-i18n-aria="imei.openFullAria" title="Open the full IMEI Control Center" aria-label="Open — full IMEI Control Center"><span data-i18n="imei.open">Open</span> <span class="btn-arrow" aria-hidden="true"></span></button>
+            <button class="ghost open-ama" data-i18n-title="imei.openFullTitle" data-i18n-tip="tip.control" data-i18n-aria="imei.openFullAria" title="Open the full IMEI Control Center" aria-label="Open — full IMEI Control Center"><span data-i18n="imei.open">Open</span> <span class="btn-arrow" aria-hidden="true"></span></button>
           </div>
         </div>
         <div class="kpi-grid" id="ama-stats" data-i18n-aria="imei.assetsAria" aria-label="AMAYA key metrics">
@@ -330,7 +330,7 @@
             <div class="section-header" data-i18n="imei.ctaHeader">One device. One defensible story.</div>
             <p data-i18n="imei.ctaBody">Turn repeated IMEI appearances into a traceable movement record — and make every unresolved conflict visible before it becomes a reporting error.</p>
           </div>
-          <button class="primary open-ama"><span data-i18n="imei.ctaButton">Open full Control Center</span> <span class="btn-arrow" aria-hidden="true"></span></button>
+          <button class="primary open-ama" data-i18n-title="imei.openFullTitle" data-i18n-tip="tip.control" title="Open the full IMEI Control Center"><span data-i18n="imei.ctaButton">Open full Control Center</span> <span class="btn-arrow" aria-hidden="true"></span></button>
         </div>
         <p class="ama-snapshot-note" id="ama-snapshot-note"></p>
       </section>

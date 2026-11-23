@@ -5,10 +5,11 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const files = [
-  'electron/main.js', 'electron/preload.js',
+  'electron/main.js', 'electron/preload.js', 'electron/amaya-preload.js',
   'server/amaya.js', 'server/server.js', 'server/db.js', 'server/core.js',
   'server/reason.js', 'server/sync.js',
-  'web/i18n.js', 'web/nspector.js', 'web/shell.js', 'scripts/build.js'
+  'web/i18n.js', 'web/nspector.js', 'web/shell.js',
+  'vendor/amaya/assets/suite-locale-bridge.js', 'scripts/build.js'
 ];
 let bad = 0;
 for (const f of files) {
@@ -23,7 +24,8 @@ for (const f of files) {
 
 const must = [
   'web/index.html', 'web/shell.css', 'web/nspector.css', 'web/fonts/fonts.css',
-  'vendor/amaya/index.html', 'vendor/amaya/data/assets.json',
+  'vendor/amaya/index.html', 'vendor/amaya/assets/suite-locale-bridge.js',
+  'vendor/amaya/data/assets.json',
   'vendor/amaya/data/events.json', 'vendor/amaya/data/meta.json',
   'node_modules/better-sqlite3/build/Release/better_sqlite3.node'
 ];
