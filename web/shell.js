@@ -518,10 +518,6 @@
   });
   // optional: focus the new window's search if it has an search field
   // no more frame-full/Escape trapping when AMAYA is its own window
-      e.preventDefault();
-      $('#gs-q').focus();
-    }
-  });
 
   // ---------------------------------------------------------------- sources
   async function loadSources(force) {
