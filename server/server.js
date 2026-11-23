@@ -23,6 +23,9 @@ const dbm = require('./db');
 const sync = require('./sync');
 const core = require('./core');
 const amaya = require('./amaya');
+const auth = require('./auth');
+const cache = require('./cache');
+const audit = require('./audit');
 
 const ROOT = path.join(__dirname, '..');
 const WEB = path.join(ROOT, 'web');
@@ -322,6 +325,38 @@ function inspectSerial(serial) {
   };
 }
 
+// ---------- API: Authentication ----------
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required', requestId: req.requestId });
+  }
+  const result = auth.login(username, password);
+  if (!result) {
+    logger.warn('Login failed', { username, ip: req.ip, requestId: req.requestId });
+    return res.status(401).json({ error: 'Invalid credentials', requestId: req.requestId });
+  }
+  audit.log(db, 'login', { user: username, ip: req.ip, requestId: req.requestId });
+  res.json(result);
+});
+
+app.post('/api/auth/register', (req, res) => {
+  const { username, password, role } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required', requestId: req.requestId });
+  }
+  const result = auth.register(username, password, role || 'viewer');
+  if (result.error) {
+    return res.status(400).json({ error: result.error, requestId: req.requestId });
+  }
+  audit.log(db, 'register', { user: username, role: role || 'viewer', ip: req.ip, requestId: req.requestId });
+  res.json(result);
+});
+
+app.get('/api/auth/me', auth.authenticate, (req, res) => {
+  res.json({ user: req.user });
+});
+
 // ---------- API: Health & Stats ----------
 app.get('/api/health', (req, res) => {
   const stats = dbm.stats(db);
@@ -521,6 +556,19 @@ app.get('/api/inspect/:serial', validateSerial, (req, res) => {
   res.json(inspectSerial(req.params.serial.trim()));
 });
 
+// ---------- API: Database Backup ----------
+app.post('/api/backup', auth.authenticate, auth.authorize('sync'), (req, res) => {
+  try {
+    const backupPath = path.join('/tmp', `nspector-backup-${Date.now()}.db`);
+    db.backup(backupPath);
+    audit.log(db, 'backup_created', { user: req.user.username, path: backupPath, requestId: req.requestId });
+    res.json({ ok: true, path: backupPath, timestamp: new Date().toISOString() });
+  } catch (e) {
+    logger.error('Backup failed', { error: e.message, requestId: req.requestId });
+    res.status(500).json({ error: 'Backup failed', requestId: req.requestId });
+  }
+});
+
 // ---------- API: Sync ----------
 app.post('/api/sync', async (req, res) => {
   const ids = (req.body && req.body.sheetIds) || null;
@@ -542,6 +590,55 @@ app.get('/api/sync/status', (req, res) => {
 });
 
 app.get('/api/clients', (req, res) => res.json({ live: clients.size }));
+
+// ---------- API: Audit Log ----------
+app.get('/api/audit', auth.authenticate, auth.authorize('read'), (req, res) => {
+  const filters = {
+    action: req.query.action,
+    user: req.query.user,
+    entity: req.query.entity,
+    since: req.query.since,
+    limit: req.query.limit,
+  };
+  const rows = audit.query(db, filters);
+  res.json({ rows, total: rows.length });
+});
+
+// ---------- API: OpenAPI Spec ----------
+app.get('/api/docs', (req, res) => {
+  res.json({
+    openapi: '3.0.0',
+    info: {
+      title: 'AMAYA × NSpector Suite API',
+      version: config.version,
+      description: 'Unified device intelligence API — NSpector ledger + AMAYA IMEI Control Center',
+    },
+    servers: [{ url: `http://localhost:${config.port}` }],
+    paths: {
+      '/api/health': { get: { summary: 'Health check', responses: { 200: { description: 'OK' } } } },
+      '/api/stats': { get: { summary: 'Database statistics', responses: { 200: { description: 'Stats' } } } },
+      '/api/overview': { get: { summary: 'Dashboard overview', responses: { 200: { description: 'Overview data' } } } },
+      '/api/duplicates': { get: { summary: 'Duplicate serials', parameters: [{ name: 'kind', in: 'query' }, { name: 'dealer', in: 'query' }, { name: 'limit', in: 'query' }, { name: 'offset', in: 'query' }] } },
+      '/api/imei/{serial}': { get: { summary: 'IMEI lookup', parameters: [{ name: 'serial', in: 'path', required: true }] } },
+      '/api/dealers': { get: { summary: 'List dealers', parameters: [{ name: 'q', in: 'query' }, { name: 'limit', in: 'query' }] } },
+      '/api/findings': { get: { summary: 'List findings', parameters: [{ name: 'status', in: 'query' }, { name: 'kind', in: 'query' }, { name: 'severity', in: 'query' }, { name: 'owner', in: 'query' }] } },
+      '/api/inspect/{serial}': { get: { summary: 'Full reasoning dossier', parameters: [{ name: 'serial', in: 'path', required: true }] } },
+      '/api/combo/overview': { get: { summary: 'Merged NSpector + AMAYA overview' } },
+      '/api/combo/asset/{serial}': { get: { summary: 'Merged device dossier', parameters: [{ name: 'serial', in: 'path', required: true }] } },
+      '/api/combo/search': { get: { summary: 'Cross-ledger search', parameters: [{ name: 'q', in: 'query' }, { name: 'limit', in: 'query' }] } },
+      '/api/combo/sources': { get: { summary: 'Data source inventory' } },
+      '/api/metrics': { get: { summary: 'System metrics' } },
+      '/api/audit': { get: { summary: 'Audit log', security: [{ bearerAuth: [] }] } },
+      '/api/auth/login': { post: { summary: 'Login', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { username: { type: 'string' }, password: { type: 'string' } } } } } } } },
+      '/api/auth/register': { post: { summary: 'Register', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { username: { type: 'string' }, password: { type: 'string' }, role: { type: 'string' } } } } } } } },
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      },
+    },
+  });
+});
 
 // ---------- API: Merged NSpector + AMAYA ----------
 let overlapCache = null;
