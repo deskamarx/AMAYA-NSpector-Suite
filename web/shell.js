@@ -32,38 +32,67 @@
   let sources = null;
   let current = 'overview';
   let lookupSeq = 0;
+  let suggestSeq = 0;
+  let suggestIndex = -1;
+  let suggestRows = [];
+  let suggestInput = null;
+
+  // Electron's main window uses contextIsolation — never touch Node globals here.
+  // The desktop build exposes a tiny, audited bridge via preload.js.
+  const desktop = !!(window.amayaShell && window.amayaShell.isDesktop);
 
   async function api(p, o) {
     const r = await fetch(p, o);
-    if (!r.ok) throw new Error(p + ' → HTTP ' + r.status);
+    if (!r.ok) {
+      let detail = '';
+      try { const j = await r.json(); if (j.error) detail = ' · ' + j.error; } catch (e) {}
+      throw new Error('HTTP ' + r.status + detail);
+    }
     return r.json();
   }
 
-  function toast(msg) {
+  function toast(msg, type) {
     const t = $('#toast');
     t.textContent = msg;
+    if (type) t.dataset.type = type; else delete t.dataset.type;
     t.classList.add('show');
     clearTimeout(t._t);
-    t._t = setTimeout(() => t.classList.remove('show'), 2800);
+    t._t = setTimeout(() => t.classList.remove('show'), type === 'error' ? 4200 : 2800);
   }
+  window.SuiteToast = toast;
 
   // ---------------------------------------------------------------- router
-  function showWorkspace(name) {
+  function showWorkspace(name, fromHistory) {
     if (!TITLES[name]) name = 'overview';
     current = name;
-    $$('#railnav button').forEach(b => b.classList.toggle('active', b.dataset.ws === name));
+    hideSuggestions();
+    $$('#railnav button').forEach(b => {
+      const on = b.dataset.ws === name;
+      b.classList.toggle('active', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
     $$('.workspace').forEach(w => w.classList.toggle('active', w.dataset.ws === name));
     const [eyebrow, title] = TITLES[name];
     $('#ws-eyebrow').textContent = eyebrow;
     $('#ws-title').textContent = title;
+    document.title = title + ' · AMAYA × NSpector';
     document.body.classList.toggle('ws-imei-active', name === 'imei');
-    try { history.replaceState(null, '', '#' + name); } catch (e) {}
+    if (!fromHistory) {
+      const target = '#' + name;
+      try { if (location.hash !== target) history.pushState({ ws:name }, '', target); } catch (e) {}
+    }
+    window.scrollTo({ top:0, behavior:'auto' });
     if (name === 'overview') loadOverview();
     if (name === 'lookup') setTimeout(() => $('#lookup-q').focus(), 40);
     if (name === 'devices' && window.NSpectorUI) window.NSpectorUI.refreshAll();
-    if (name === 'imei') ensureFrame();
+    if (name === 'imei') renderAmaWorkspace();
     if (name === 'sources') loadSources();
   }
+
+  window.addEventListener('popstate', () => {
+    const h = (location.hash || '').replace('#', '');
+    showWorkspace(TITLES[h] ? h : 'overview', true);
+  });
 
   $$('#railnav button').forEach(b => b.addEventListener('click', () => showWorkspace(b.dataset.ws)));
   $('.rail-brand').addEventListener('click', () => showWorkspace('overview'));
@@ -72,7 +101,7 @@
     const go = e.target.closest('[data-goto]');
     if (go) { showWorkspace(go.dataset.goto); return; }
     const look = e.target.closest('[data-serial]');
-    if (look) { e.preventDefault(); openLookup(look.dataset.serial); }
+    if (look && !look.classList.contains('suggest-item')) { e.preventDefault(); openLookup(look.dataset.serial); }
   });
 
   // ---------------------------------------------------------------- global search
@@ -80,17 +109,157 @@
     e.preventDefault();
     const q = $('#gs-q').value.trim();
     if (!q) return;
-    openLookup(q);
-  });
-  $('#gs-q').addEventListener('keydown', e => {
-    if (e.key === 'Escape') { e.target.value = ''; e.target.blur(); }
+    openLookup(suggestRows[suggestIndex] ? suggestRows[suggestIndex].serial : q);
   });
 
   function openLookup(serial) {
+    hideSuggestions();
     showWorkspace('lookup');
     $('#lookup-q').value = serial || '';
     if (serial) runLookup(serial);
   }
+
+  // ---------------------------------------------------------------- typeahead
+  function suggestBox(input) {
+    return input.id === 'gs-q' ? $('#gs-suggest') : $('#lk-suggest');
+  }
+
+  function suggestKeys(e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!suggestRows.length) return;
+      e.preventDefault();
+      suggestIndex += (e.key === 'ArrowDown' ? 1 : -1);
+      if (suggestIndex < 0) suggestIndex = suggestRows.length - 1;
+      if (suggestIndex >= suggestRows.length) suggestIndex = 0;
+      paintSuggestions(suggestInput);
+    } else if (e.key === 'Enter' && suggestIndex >= 0 && suggestRows[suggestIndex]) {
+      e.preventDefault();
+      openLookup(suggestRows[suggestIndex].serial);
+    } else if (e.key === 'Escape') {
+      if (suggestInput && !suggestBox(suggestInput).hidden) { e.stopPropagation(); hideSuggestions(); }
+      else { e.target.value = ''; e.target.blur(); }
+    }
+  }
+
+  function hideSuggestions() {
+    ['#gs-suggest', '#lk-suggest'].forEach(s => {
+      const box = $(s);
+      if (box) { box.hidden = true; box.innerHTML = ''; }
+    });
+    ['#gs-q', '#lookup-q'].forEach(s => {
+      const el = $(s);
+      if (el) {
+        el.setAttribute('aria-expanded', 'false');
+        el.removeAttribute('aria-activedescendant');
+      }
+    });
+    suggestRows = []; suggestIndex = -1; suggestInput = null;
+  }
+
+  function paintSuggestions(input) {
+    const box = suggestBox(input);
+    if (!box || !suggestRows.length) { hideSuggestions(); return; }
+    const prefix = input.id === 'gs-q' ? 'gs' : 'lk';
+    box.innerHTML =
+      '<div class="suggest-head"><span>Matching devices</span><em>' + suggestRows.length + ' found</em></div>' +
+      suggestRows.map((r, i) => `
+        <button type="button" id="${prefix}-opt-${i}" class="suggest-item ${i === suggestIndex ? 'active' : ''}"
+                role="option" aria-selected="${i === suggestIndex}" data-serial="${esc(r.serial)}"
+                data-presence="${r.inNs && r.inAmaya ? 'both' : r.inNs ? 'nspector' : 'amaya'}">
+          <i class="src-dot ${r.inNs && r.inAmaya ? 'both' : r.inNs ? 'nspector' : 'amaya'}"></i>
+          <span class="s-body"><b>${esc(r.serial)}</b><small>${esc(r.family || (r.amaya && r.amaya.product) || (r.inAmaya ? 'AMAYA asset' : 'NSpector dispatch'))}</small></span>
+          <em>${r.inNs && r.inAmaya ? 'both' : r.inNs ? 'NS' : 'AM'}</em>
+        </button>`).join('');
+    box.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    if (suggestIndex >= 0) input.setAttribute('aria-activedescendant', prefix + '-opt-' + suggestIndex);
+    else input.removeAttribute('aria-activedescendant');
+  }
+
+  async function runSuggestions(input) {
+    const q = input.value.trim();
+    if (q.length < 3) { hideSuggestions(); return; }
+    const seq = ++suggestSeq;
+    suggestInput = input;
+    try {
+      const data = await api('/api/combo/search?q=' + encodeURIComponent(q) + '&limit=8');
+      if (seq !== suggestSeq || document.activeElement !== input) return;
+      suggestRows = data.rows || [];
+      suggestIndex = suggestRows.length ? 0 : -1;
+      const box = suggestBox(input);
+      if (!suggestRows.length) {
+        box.innerHTML = '<div class="suggest-empty"><b>No devices found</b>Try a different IMEI or serial.</div>';
+        box.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        input.removeAttribute('aria-activedescendant');
+      } else paintSuggestions(input);
+    } catch (e) { /* typing must never surface a disruptive error */ }
+  }
+
+  function bindSuggest(input) {
+    input.addEventListener('input', () => {
+      clearTimeout(input._suggestTimer);
+      input._suggestTimer = setTimeout(() => runSuggestions(input), 140);
+    });
+    input.addEventListener('focus', () => { if (input.value.trim().length >= 3) runSuggestions(input); });
+    input.addEventListener('blur', () => setTimeout(() => {
+      if (document.activeElement !== input && !suggestBox(input).contains(document.activeElement)) hideSuggestions();
+    }, 180));
+    input.addEventListener('keydown', suggestKeys);
+  }
+  bindSuggest($('#gs-q'));
+  bindSuggest($('#lookup-q'));
+  document.addEventListener('click', e => {
+    const item = e.target.closest('.suggest-item[data-serial]');
+    if (item) { e.preventDefault(); openLookup(item.dataset.serial); return; }
+    if (!e.target.closest('.suggest') && !e.target.closest('#global-search') && !e.target.closest('.lookup-form')) hideSuggestions();
+  });
+
+  // ---------------------------------------------------------------- keyboard
+  function keyboard(e) {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''));
+    const meta = e.metaKey || e.ctrlKey;
+    if (meta && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      const global = $('#gs-q');
+      global.focus(); global.select();
+      return;
+    }
+    if (e.key === '?' && !typing) { e.preventDefault(); openShortcuts(); return; }
+    if (e.key === '/' && !typing) {
+      e.preventDefault(); showWorkspace('lookup'); $('#lookup-q').focus(); return;
+    }
+    if (e.key === 'Escape') {
+      const sheet = $('#sheet');
+      if (sheet.classList.contains('open')) {
+        if (window.NSpectorUI && window.NSpectorUI.closeFindingSheet) window.NSpectorUI.closeFindingSheet();
+        else sheet.classList.remove('open');
+        return;
+      }
+      const dlg = $('#shortcuts');
+      if (dlg && dlg.open) { closeShortcuts(); return; }
+    }
+    if (!typing && !meta && /^[1-5]$/.test(e.key)) {
+      e.preventDefault();
+      showWorkspace(['overview', 'lookup', 'devices', 'imei', 'sources'][Number(e.key) - 1]);
+    }
+  }
+  document.addEventListener('keydown', keyboard);
+
+  function openShortcuts() {
+    const dlg = $('#shortcuts');
+    if (!dlg) return;
+    if (typeof dlg.showModal === 'function') dlg.showModal();
+    else dlg.setAttribute('open', '');
+  }
+  function closeShortcuts() {
+    const dlg = $('#shortcuts');
+    if (dlg && typeof dlg.close === 'function') dlg.close();
+    else if (dlg) dlg.removeAttribute('open');
+  }
+  $('#shortcuts-btn').addEventListener('click', openShortcuts);
+  $('#shortcuts-close').addEventListener('click', closeShortcuts);
+  $('#shortcuts').addEventListener('click', e => { if (e.target.id === 'shortcuts') closeShortcuts(); });
 
   // ---------------------------------------------------------------- overview
   async function loadOverview(force) {
@@ -98,7 +267,14 @@
     try {
       overview = await api('/api/combo/overview');
     } catch (e) {
-      $('#ov-kpis').innerHTML = '<div class="kpi error">Overview API unavailable.<span>' + esc(e.message) + '</span></div>';
+      $('#ov-kpis').innerHTML = `<div class="kpi error">Overview data unavailable<span>${esc(e.message)}</span>
+        <button class="retry-btn" id="ov-retry">Try again</button></div>`;
+      ['#ov-recon-body', '#ov-amaya-body', '#ov-ns-body', '#ov-critical-body', '#ov-sources-body'].forEach(sel => {
+        const el = $(sel);
+        if (el) el.innerHTML = '<p class="hint">Waiting for a successful overview load.</p>';
+      });
+      const retry = $('#ov-retry');
+      if (retry) retry.addEventListener('click', () => { retry.disabled = true; loadOverview(true); });
       return;
     }
     renderOverview();
@@ -254,7 +430,9 @@
   $('#lookup-form').addEventListener('submit', e => {
     e.preventDefault();
     const q = $('#lookup-q').value.trim();
-    if (q) runLookup(q);
+    if (!q) return;
+    hideSuggestions();
+    runLookup(q);
   });
   document.addEventListener('click', e => {
     const chip = e.target.closest('#lookup-try .chipbtn');
@@ -353,9 +531,18 @@
     }));
     out.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
       const s = b.dataset.copy;
-      try { await navigator.clipboard.writeText(s); } catch (e) {}
+      let copied = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(s); copied = true;
+        }
+      } catch (e) { /* insecure context or denied permission */ }
       showWorkspace('imei');
-      toast('Serial copied. Paste it into the Control Center search.');
+      if (window.SuiteOpenControlCenter) window.SuiteOpenControlCenter(true);
+      toast(copied
+        ? 'Serial copied — paste it into the Control Center search.'
+        : 'Control Center opened — copy the serial above to continue.',
+        copied ? 'success' : 'warn');
     }));
   }
 
@@ -482,42 +669,86 @@
     return html;
   }
 
-  let amayaWin = null;
-  function ensureAmaWindow() {
-    if (!amayaWin) {
-      amayaWin = new BrowserWindow({
-        width: 1440, height: 860, minWidth: 960, minHeight: 640,
-        backgroundColor: '#05070f', title: 'AMAYA IMEI Control Center',
-        webPreferences: {
-          contextIsolation: true, nodeIntegration: false, spellcheck: false,
-          // allow the PWA to use its hardcoded base path
-          session: { partition: 'AmaControlCenter' }
-        }
-      });
-      amayaWin.loadURL(`http://localhost:${location.port || 4173}/amaya-imei-control-center/`);
-      amayaWin.on('closed', () => { amayaWin = null; });
-      // forward top-level links out of the app
-      amayaWin.webContents.setWindowOpenHandler(({ url }) => {
-        if (/^https?:/i.test(url)) shell.openExternal(url);
-        return { action: 'deny' };
-      });
+  // ---------------------------------------------------------------- AMAYA workspace
+  const AMA_PATH = '/amaya-imei-control-center/';
+
+  function openControlCenter(silent) {
+    if (desktop && window.amayaShell.openControlCenter) {
+      Promise.resolve(window.amayaShell.openControlCenter())
+        .then(ok => { if (!silent) toast(ok ? 'Control Center opened in its own window' : 'Could not open the Control Center', ok ? 'success' : 'error'); })
+        .catch(() => { if (!silent) toast('Could not open the Control Center', 'error'); });
+    } else {
+      const w = window.open(AMA_PATH, '_blank');
+      if (w) { try { w.opener = null; } catch (e) {} }
+      if (!silent) toast(w ? 'Control Center opened in a new tab' : 'Allow pop-ups to open the Control Center', w ? 'success' : 'warn');
     }
-    // bring to front if minimized
-    if (amayaWin.isMinimized()) amayaWin.show();
-    else amayaWin.focus();
-    return amayaWin;
   }
+  window.SuiteOpenControlCenter = openControlCenter;
+  $$('.open-ama').forEach(b => b.addEventListener('click', () => openControlCenter()));
   $('#frame-reload').addEventListener('click', () => {
-    const w = ensureAmaWindow();
-    if (w && w.webContents) w.webContents.reload();
-    toast('Control Center reloaded');
+    if (desktop && window.amayaShell.reloadControlCenter) {
+      Promise.resolve(window.amayaShell.reloadControlCenter())
+        .then(() => toast('Control Center window reloaded'));
+    } else {
+      overview = null;
+      renderAmaWorkspace();
+      toast('Snapshot metrics refreshed');
+    }
   });
-  $('#openAmaWindow').addEventListener('click', () => {
-    ensureAmaWindow();
-    toast('AMAYA IMEI Control Center window opened');
-  });
-  // optional: focus the new window's search if it has an search field
-  // no more frame-full/Escape trapping when AMAYA is its own window
+
+  function renderAmaWorkspace() {
+    if (overview && overview.amaya) return paintAma(overview.amaya);
+    api('/api/combo/overview').then(d => {
+      overview = d;
+      paintAma(d.amaya || {});
+    }).catch(e => {
+      $('#frame-note').textContent = 'Snapshot unavailable';
+      $('#ama-review').textContent = 'Metrics could not be loaded.';
+      $('#ama-states').innerHTML = '';
+      $('#ama-snapshot-note').textContent = '';
+      $('#ama-stats').innerHTML = `<div class="kpi error">Snapshot unavailable<span>${esc(e.message)}</span>
+        <button class="retry-btn" id="ama-retry">Try again</button></div>`;
+      const r = $('#ama-retry');
+      if (r) r.addEventListener('click', () => { overview = null; renderAmaWorkspace(); });
+    });
+  }
+
+  function paintAma(a) {
+    const d = a.derived || {};
+    $('#frame-note').textContent = num(a.assets) + ' assets · ' + num(a.events) + ' movement events';
+
+    const cards = [
+      ['⚡', 'Unique Assets', a.assets, 'one-row deduplicated ledger'],
+      ['↩', 'Repeated IDs', a.repeatIds, 'present in 2+ source tabs'],
+      ['⇄', 'Movement Conflicts', a.conflicts, 'states disagree across evidence'],
+      ['◷', 'No Terminal State', d.assetsWithoutTerminalState, 'of the ledger cannot be resolved']
+    ];
+    $('#ama-stats').innerHTML = cards.map(([icon, label, value, sub]) => `
+      <div class="stat-card">
+        <div class="icon" aria-hidden="true">${icon}</div>
+        <div class="label">${esc(label)}</div>
+        <div class="value">${num(value)}</div>
+        <div class="sub">${esc(sub)}</div>
+      </div>`).join('');
+
+    $('#ama-review').innerHTML =
+      `<span><b>${num(d.assetsWithoutTerminalState || 0)}</b> outside the review queue</span>` +
+      `<span><b>${num(a.emptyTabs || 0)}</b> empty tabs</span>` +
+      `<span><b>${num(a.reviewQueue || 0)}</b> flagged for review</span>`;
+
+    const entries = Object.entries(a.stateCounts || {}).sort((x, y) => y[1] - x[1]);
+    const total = a.assets || 1;
+    $('#ama-states').innerHTML = entries.map(([name, count], i) => `
+      <div class="kpi ${i === 0 ? 'lead' : ''}">
+        <div class="num">${num(count)}</div>
+        <div class="label">${esc(name)}</div>
+        <div class="pct">${pct(count, total).toFixed(1)}%</div>
+      </div>`).join('') || '<p class="hint">No state data in this snapshot.</p>';
+
+    $('#ama-snapshot-note').textContent =
+      'Snapshot ' + (a.dataVersion || '—') + ' · built ' + ((a.builtAt || '').slice(0, 10) || '—') +
+      ' · source ' + (a.generatedFrom || '—');
+  }
 
   // ---------------------------------------------------------------- sources
   async function loadSources(force) {
@@ -586,7 +817,19 @@
   }
 
   // ---------------------------------------------------------------- boot
+  const rv = $('#rail-version');
+  if (rv) rv.textContent = desktop
+    ? 'v1.0.0 · offline · local engine'
+    : 'v1.0.0 · live web instance';
+
+  // Let the NSpector sync action invalidate the merged caches too.
+  window.SuiteRefresh = function () {
+    overview = null; sources = null;
+    loadOverview(true);
+    if (current === 'sources') loadSources(true);
+    if (current === 'imei') renderAmaWorkspace();
+  };
+
   const initial = (location.hash || '').replace('#', '');
   showWorkspace(TITLES[initial] ? initial : 'overview');
-  if (window.NSpectorUI && window.NSpectorUI.refreshAll) window.NSpectorUI.refreshAll();
 })();

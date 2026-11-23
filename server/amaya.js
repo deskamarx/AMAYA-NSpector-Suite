@@ -147,6 +147,7 @@ function stats() {
     repeatIds: m.repeatIds || 0,
     reviewQueue: m.reviewQueue || 0,
     errorTokens: m.errorTokens || 0,
+    emptyTabs: m.emptyTabs || 0,
     stateCounts: m.stateCounts || {},
     states: m.states || [],
     topTabs: m.topTabs || [],

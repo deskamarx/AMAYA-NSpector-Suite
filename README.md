@@ -17,7 +17,7 @@ device with two evidence trails.
 | **Overview** | Combined KPIs, exact IMEI reconciliation (54,915 matches), AMAYA lifecycle mix, NSpector exposure, priority findings. |
 | **Unified lookup** | One serial → NSpector custody trail, returns, findings and reasoning **plus** every AMAYA workbook occurrence, state and source citation. |
 | **Device ledger** | The full NSpector UI (Work Queue, Inspector, Exposure, Flows, Dealers, Ownership) with finding tracking. |
-| **IMEI Control Center** | The original AMAYA PWA embedded, with reload / fullscreen controls. |
+| **IMEI Control Center** | A native metrics workspace plus a first-class Control Center window / browser tab — never an iframe. |
 | **Data sources** | Local file inventory, snapshot versions and the four source workbooks. |
 
 ## Run
@@ -42,10 +42,23 @@ the LAN at `http://<this-pc>:4173`.
 
 Nothing is fetched at runtime; fonts, data and code are local.
 
+## Keyboard
+
+| Key | Action |
+| --- | --- |
+| `Ctrl` / `⌘` + `K` | Focus the global serial search |
+| `/` | Open unified lookup |
+| `1`–`5` | Switch workspace |
+| `↑` / `↓` | Move through search suggestions |
+| `Enter` | Open the highlighted dossier |
+| `?` | Show the shortcut sheet |
+| `Esc` | Close a panel, dialog or suggestions |
+
 ## Project layout
 
 ```
-electron/main.js        desktop shell, first-run data seeding, menus
+electron/main.js        desktop shell, first-run data seeding, menus, IPC
+electron/preload.js     audited contextBridge to desktop-only capabilities
 server/server.js        unified Express API + WebSocket live sync
 server/amaya.js         AMAYA snapshot index, lookup, search, overlap
 server/db.js            SQLite schema/open

@@ -3,20 +3,20 @@
   'use strict';
   const API = location.origin;
   let ws = null, retry = 0;
-  let queueLimit = 40, queueOffset = 0, lastFilter = '';
+  let queueLimit = 40, queueOffset = 0;
 
   const $  = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
     ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const money = n => 'Tk ' + Math.round(n || 0).toLocaleString('en-IN');
-  const short = n => (n || 0).toLocaleString();
+  const short = n => (n || 0).toLocaleString('en-IN');
   const tb = n => { // compact taka
     n = n || 0;
     if (n >= 10000000) return 'Tk ' + (n/10000000).toFixed(2) + ' Cr';
     if (n >= 100000)   return 'Tk ' + (n/100000).toFixed(2) + ' L';
     if (n >= 1000)     return 'Tk ' + (n/1000).toFixed(0) + 'k';
-    return 'Tk ' + n.toLocaleString();
+    return 'Tk ' + n.toLocaleString('en-IN');
   };
   const KIND = {
     duplicate_cross:'two dealers', duplicate_multi:'3+ dealers', orphan_return:'never dispatched',
@@ -25,9 +25,25 @@
   };
   const STATUS = ['open','investigating','resolved','dismissed'];
 
-  function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');
-    clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);}
-  async function api(p,o){const r=await fetch(API+p,o);if(!r.ok)throw new Error(r.statusText);return r.json();}
+  function toast(m, type){
+    if (window.SuiteToast) return window.SuiteToast(m, type);
+    const t=$('#toast');t.textContent=m;t.classList.add('show');
+    clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);
+  }
+  async function api(p,o){
+    const r=await fetch(API+p,o);
+    if(!r.ok){
+      let detail=''; try{ const j=await r.json(); if(j.error) detail=' · '+j.error; }catch(e){}
+      throw new Error(r.statusText+detail);
+    }
+    return r.json();
+  }
+  const panelError = (id, label, err) => {
+    const el = $(id);
+    if (el) el.innerHTML = `<div class="panel-error"><b>${esc(label)} unavailable</b>
+      <span>${esc((err && err.message) || 'Unknown error')}</span>
+      <button class="retry-btn" data-retry="${id.slice(1)}">Try again</button></div>`;
+  };
   const val = f => f.value_at_risk > 0
     ? `<span class="tag val">${money(f.value_at_risk)}</span>`
     : (f.kind === 'duplicate_cross' || f.kind === 'duplicate_multi'
@@ -42,7 +58,11 @@
     ws.onerror = () => { try { ws.close(); } catch(e){} };
     ws.onmessage = e => {
       let d; try { d = JSON.parse(e.data); } catch(x){ return; }
-      if (d.type === 'synced') { toast('Synced · ' + short(d.stats.dispatches) + ' records'); refreshAll(); }
+      if (d.type === 'synced') {
+        toast('Synced · ' + short((d.stats || {}).dispatches || 0) + ' records', 'success');
+        refreshAll();
+        if (window.SuiteRefresh) window.SuiteRefresh();
+      }
       else if (d.type === 'finding_updated') {
         const t = currentTab();
         if (t === 'queue') loadQueue(true);
@@ -51,8 +71,16 @@
       }
     };
   }
-  function retryConnect(){ retry = Math.min(retry+1,6); setTimeout(connect, 500*Math.pow(2,retry)); }
-  function syncState(cls,txt){const el=$('#syncstate');el.textContent=txt;el.className=cls;}
+  function retryConnect(){
+    retry = Math.min(retry+1,7);
+    if (retry >= 7) { syncState('off','live sync paused'); return; }
+    setTimeout(connect, 500*Math.pow(2,retry));
+  }
+  function syncState(cls,txt){
+    const el=$('#syncstate');
+    if (el) { el.textContent=txt; el.className=cls; el.title = cls==='live' ? 'Live sync connected' : 'Click to reconnect'; }
+  }
+  $('#syncstate').addEventListener('click', () => { retry = 0; connect(); toast('Reconnecting live sync…'); });
   function currentTab(){ const b=$('#tabs button.active'); return b ? b.dataset.tab : 'queue'; }
 
   // ------------------------------------------------ work queue
@@ -82,8 +110,14 @@
     </div>`;
   }
 
+  let queueBusy = false;
   async function loadQueue(reset){
-    if (reset) queueOffset = 0;
+    if (queueBusy) return;
+    if (reset) {
+      queueOffset = 0;
+      $('#queue-list').innerHTML = `<div class="card-skeleton"></div><div class="card-skeleton"></div><div class="card-skeleton"></div>`;
+    }
+    queueBusy = true;
     const p = new URLSearchParams({ limit: queueLimit, offset: queueOffset });
     const st=$('#fq-status').value, sv=$('#fq-sev').value, kd=$('#fq-kind').value;
     const ow=$('#fq-owner').value.trim(), mv=$('#fq-min').value;
@@ -91,7 +125,8 @@
     if(ow)p.set('owner',ow); if(mv)p.set('minValue',mv);
     let d;
     try { d = await api('/api/findings?' + p); }
-    catch(e){ toast('Could not load the queue'); return; }
+    catch(e){ queueBusy = false; panelError('#queue-list', 'Work queue', e); return; }
+    queueBusy = false;
     const c = d.counts || {};
     $('#queue-stats').innerHTML = `
       <span class="pill crit">Open <b>${short(c.open||0)}</b></span>
@@ -102,9 +137,15 @@
       <span class="pill crit">Open value <b>${tb(c.open_value||0)}</b></span>`;
     const rows = d.rows || [];
     const html = rows.map(fCard).join('');
-    if (reset) $('#queue-list').innerHTML = html;
+    if (!rows.length && reset) {
+      $('#queue-list').innerHTML = `<div class="panel inline-empty"><b>No findings match these filters</b>
+        <span>Clear a filter or widen the value range to see more of the ledger.</span>
+        <button class="retry-btn" data-clear-filters>Clear filters</button></div>`;
+    } else if (reset) $('#queue-list').innerHTML = html;
     else $('#queue-list').insertAdjacentHTML('beforeend', html);
-    $('#q-more').style.display = rows.length < queueLimit ? 'none' : 'block';
+    const more = $('#q-more');
+    more.style.display = rows.length < queueLimit ? 'none' : 'block';
+    more.textContent = 'Load more · ' + short($('#queue-list').querySelectorAll('.card').length) + ' shown';
   }
 
   document.addEventListener('change', async e => {
@@ -132,8 +173,9 @@
 
     let trail = '';
     if (f.serial) {
-      const im = await api('/api/inspect/' + encodeURIComponent(f.serial));
-      if (im.dispatches.length > 1) {
+      let im = null;
+      try { im = await api('/api/inspect/' + encodeURIComponent(f.serial)); } catch (e) { /* custody is supplementary */ }
+      if (im && im.dispatches && im.dispatches.length > 1) {
         trail = `<h4 style="margin:18px 0 8px;font-size:12px;letter-spacing:.5em;
           text-transform:uppercase;color:var(--dim2)">Chain of custody</h4>
           <div class="flow">${im.dispatches.map(x => `<div class="flowstep">
@@ -142,7 +184,7 @@
             <span class="sub"> · ${esc(x.wing||'-')} · ${esc(x.family||x.sku||'')} · ${esc(x.source||'')}</span></span>
           </div>`).join('')}</div>`;
       }
-      if (im.returns.length) trail += `<h4 style="margin:18px 0 8px;font-size:12px;letter-spacing:.5em;
+      if (im && im.returns && im.returns.length) trail += `<h4 style="margin:18px 0 8px;font-size:12px;letter-spacing:.5em;
         text-transform:uppercase;color:var(--dim2)">Returns</h4>
         <div class="flow">${im.returns.map(r => `<div class="flowstep">
           <span class="when">${esc(r.rdate)}</span>
@@ -200,9 +242,26 @@
       <div class="sheet-actions">
         ${STATUS.map(s=>`<button class="${s===f.status?'primary':''}" data-set="${s}">${s}</button>`).join('')}
       </div>`;
-    $('#sheet').classList.add('open');
+    openSheet();
     $('#sh-body').querySelectorAll('[data-set]').forEach(b =>
       b.addEventListener('click', () => saveFinding(id,{status:b.dataset.set})));
+  }
+
+  let sheetReturnFocus = null;
+  function openSheet(){
+    sheetReturnFocus = document.activeElement;
+    const sheet = $('#sheet');
+    sheet.classList.add('open');
+    sheet.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('sheet-open');
+    setTimeout(()=>{ const b=$('#sh-close'); if(b) b.focus(); }, 30);
+  }
+  function closeSheet(){
+    const sheet = $('#sheet');
+    sheet.classList.remove('open');
+    sheet.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('sheet-open');
+    if (sheetReturnFocus && sheetReturnFocus.focus) sheetReturnFocus.focus();
   }
 
   async function saveFinding(id, patch){
@@ -211,12 +270,22 @@
     try{
       await api('/api/findings/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},
         body:JSON.stringify(patch)});
-      $('#sheet').classList.remove('open');
-      toast('Saved'); loadQueue(true); loadOwnership(); loadTopExposure();
-    }catch(e){ toast('Save failed'); }
+      closeSheet();
+      toast('Saved', 'success'); refreshAll(); if (window.SuiteRefresh) window.SuiteRefresh();
+    }catch(e){ toast('Save failed — ' + (e.message||'unknown error'), 'error'); }
   }
-  $('#sh-close').addEventListener('click', ()=>$('#sheet').classList.remove('open'));
-  $('#sheet').addEventListener('click', e=>{ if(e.target.id==='sheet') $('#sheet').classList.remove('open'); });
+  $('#sh-close').addEventListener('click', closeSheet);
+  $('#sheet').addEventListener('click', e=>{ if(e.target.id==='sheet') closeSheet(); });
+  $('#sheet').addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.stopPropagation(); closeSheet(); return; }
+    if (e.key !== 'Tab') return;
+    const focusable = Array.from($('#sheet').querySelectorAll('button, input, textarea, a[href], [tabindex]:not([tabindex="-1"])'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 
   // ------------------------------------------------ inspector
   async function inspect(serial){
@@ -309,16 +378,17 @@
 
   // ------------------------------------------------ exposure
   async function loadTopExposure(){
+    const v = $('#top-exposure-val');
     try{
-      const s = await api('/api/stats');
+      v.setAttribute('aria-busy', 'true');
       const p = await api('/api/portfolio');
-      $('#top-exposure-val').textContent = tb(p.exposure.open_total||0);
-      lastFilter = String(s.openFindings||0);
-    }catch(e){ $('#top-exposure-val').textContent = '—'; }
+      v.textContent = tb(p.exposure.open_total||0);
+      v.removeAttribute('aria-busy');
+    }catch(e){ v.textContent='—'; v.title='Could not load exposure: '+(e.message||''); v.removeAttribute('aria-busy'); }
   }
 
   async function loadExposure(){
-    let d; try { d = await api('/api/portfolio'); } catch(e){ return; }
+    let d; try { d = await api('/api/portfolio'); } catch(e){ panelError('#exp-cards', 'Exposure', e); return; }
     const e = d.exposure, st = d.stats;
     $('#exp-cards').innerHTML = [
       ['Open exposure', tb(e.open_total), 'valued at observed prices', 'crit'],
@@ -366,7 +436,7 @@
 
   // ------------------------------------------------ flows
   async function loadChains(){
-    let d; try { d = await api('/api/chains'); } catch(e){ return; }
+    let d; try { d = await api('/api/chains'); } catch(e){ panelError('#chain-list', 'Flows', e); return; }
     const rows = d.rows || [];
     $('#chain-list').innerHTML = rows.length ? rows.map(c=>`<div class="chainbox">
       <div class="chainflow">${esc(c.from_party)}<span class="arrow">→</span>${esc(c.to_party)}</div>
@@ -383,9 +453,15 @@
   async function loadDealers(){
     const s = $('#dl-search').value.trim();
     let d; try { d = await api('/api/dealers?limit=200' + (s?'&q='+encodeURIComponent(s):'')); }
-    catch(e){ return; }
-    $('#dealer-list').innerHTML = (d.rows||[]).map(x=>{
-      const al = JSON.parse(x.aliases||'[]');
+    catch(e){ panelError('#dealer-list', 'Dealers', e); return; }
+    const dealerRows = d.rows||[];
+    if (!dealerRows.length) {
+      $('#dealer-list').innerHTML = `<div class="panel inline-empty"><b>No dealers found</b><span>Try a shorter name or clear the search.</span></div>`;
+      return;
+    }
+    $('#dealer-list').innerHTML = dealerRows.map(x=>{
+      let al = [];
+      try { al = JSON.parse(x.aliases||'[]'); } catch(e) { al = []; }
       const rate = x.serials ? (x.cross_dup/x.serials*100) : 0;
       return `<div class="card ${x.cross_dup?'sev-high':'sev-low'} static">
         <h4 class="ctitle">${esc(x.name)}</h4>
@@ -402,7 +478,7 @@
 
   // ------------------------------------------------ ownership
   async function loadOwnership(){
-    let d; try { d = await api('/api/ownership'); } catch(e){ return; }
+    let d; try { d = await api('/api/ownership'); } catch(e){ panelError('#own-cards', 'Ownership', e); return; }
     $('#own-cards').innerHTML = [
       ['Unassigned', short(d.unassigned.c), tb(d.unassigned.amt)+' of open value','crit'],
       ['People involved', String(d.people.filter(p=>p.owner).length),'','acc'],
@@ -429,31 +505,58 @@
     const b = document.querySelector(`#tabs button[data-tab="${tab}"]`);
     if (b) b.click();
   }
-  $$('#tabs button').forEach(b => b.addEventListener('click', ()=>{
-    $$('#tabs button').forEach(x=>x.classList.remove('active'));
-    $$('.ws-devices .view').forEach(v=>v.classList.remove('active'));
-    b.classList.add('active');
-    $('#'+b.dataset.tab).classList.add('active');
-    LOADERS[b.dataset.tab]();
-  }));
+  $$('#tabs button').forEach((b, i, all) => {
+    b.addEventListener('click', ()=>{
+      all.forEach(x=>{ x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+      $$('.ws-devices .view').forEach(v=>v.classList.remove('active'));
+      b.classList.add('active'); b.setAttribute('aria-selected','true');
+      $('#'+b.dataset.tab).classList.add('active');
+      LOADERS[b.dataset.tab]();
+    });
+    b.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      e.preventDefault();
+      const next = all[(i + (e.key === 'ArrowRight' ? 1 : all.length - 1)) % all.length];
+      next.focus(); next.click();
+    });
+  });
 
   ['#fq-status','#fq-sev','#fq-kind'].forEach(s=>$(s).addEventListener('change',()=>loadQueue(true)));
-  let deb;
-  const debounce = fn => { clearTimeout(deb); deb = setTimeout(fn, 340); };
-  $('#fq-owner').addEventListener('input', ()=>debounce(()=>loadQueue(true)));
-  $('#fq-min').addEventListener('input', ()=>debounce(()=>loadQueue(true)));
-  $('#fq-clear').addEventListener('click', ()=>{
+  window._debounce = window._debounce || {};
+  const debounceFor = (key, fn) => () => {
+    clearTimeout(window._debounce[key]);
+    window._debounce[key] = setTimeout(fn, 340);
+  };
+  $('#fq-owner').addEventListener('input', debounceFor('owner', ()=>loadQueue(true)));
+  $('#fq-min').addEventListener('input', debounceFor('min', ()=>loadQueue(true)));
+  function clearQueueFilters(){
     ['#fq-status','#fq-sev','#fq-kind','#fq-owner','#fq-min'].forEach(s=>$(s).value='');
-    loadQueue(true); });
-  $('#q-more').addEventListener('click', ()=>{ queueOffset+=queueLimit; loadQueue(); });
-  $('#dl-search').addEventListener('input', ()=>debounce(loadDealers));
+    loadQueue(true);
+  }
+  $('#fq-clear').addEventListener('click', clearQueueFilters);
+  $('#q-more').addEventListener('click', ()=>{ if (queueBusy) return; queueOffset+=queueLimit; loadQueue(); });
+  $('#dl-search').addEventListener('input', debounceFor('dealers', loadDealers));
+  document.addEventListener('click', e => {
+    if (e.target.closest('[data-clear-filters]')) clearQueueFilters();
+    if (e.target.closest('[data-retry]')) {
+      refreshAll(); loadExposure(); loadChains(); loadDealers(); loadOwnership();
+    }
+  });
 
   $('#syncbtn').addEventListener('click', async ()=>{
-    const b=$('#syncbtn'); b.textContent='Syncing…'; b.disabled=true;
-    try{ await api('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
-      toast('Sync complete'); refreshAll(); }
-    catch(e){ toast('Sync failed'); }
-    b.textContent='Sync'; b.disabled=false;
+    const b=$('#syncbtn'), label=b.querySelector('.btn-label');
+    if (b.disabled) return;
+    b.disabled = true; b.classList.add('busy');
+    if (label) label.textContent = 'Syncing…';
+    try{
+      const res = await api('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+      toast('Sync complete · ' + short((res.stats||{}).dispatches||0) + ' records', 'success');
+      refreshAll();
+      if (window.SuiteRefresh) window.SuiteRefresh();
+    }
+    catch(e){ toast('Sync failed — ' + (e.message||'unknown error'), 'error'); }
+    b.classList.remove('busy'); b.disabled = false;
+    if (label) label.textContent = 'Sync';
   });
 
   function refreshAll(){
@@ -466,7 +569,7 @@
 
   // Surface the NSpector actions the merged shell needs to drive.
   window.NSpectorUI = {
-    inspect, openFinding, refreshAll, activateTab, loadQueue,
+    inspect, openFinding, closeFindingSheet: closeSheet, refreshAll, activateTab, loadQueue,
     get currentTab(){ return currentTab(); }
   };
 })();

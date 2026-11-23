@@ -2,7 +2,7 @@
  * main.js — desktop shell for the merged AMAYA × NSpector suite.
  * Starts the unified API/server in-process, then opens the combined UI.
  */
-const { app, BrowserWindow, Menu, shell, dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell, dialog, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -10,7 +10,18 @@ app.setName('AMAYA NSpector');
 
 const PORT = process.env.PORT || 4173;
 let win = null;
+let amayaWin = null;
 let dataDir = null;
+
+// Registered at module load so the renderer can never call before the bridge exists.
+ipcMain.handle('open-control-center', () => openControlCenter());
+ipcMain.handle('reload-control-center', () => {
+  if (amayaWin && !amayaWin.isDestroyed()) {
+    amayaWin.reload();
+    return true;
+  }
+  return openControlCenter();
+});
 
 /** Source CSVs ship inside the app; on first run copy them to userData so the
  *  user's own exports land in an editable place outside the install directory. */
@@ -78,6 +89,7 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js'),
       spellcheck: false
     }
   });
@@ -89,6 +101,40 @@ function createWindow() {
   win.on('closed', () => { win = null; });
 }
 
+/** The Control Center is a first-class window, never an embedded frame.
+ *  Launched through a contextBridge so the renderer keeps Node disabled. */
+function openControlCenter() {
+  if (amayaWin && !amayaWin.isDestroyed()) {
+    if (amayaWin.isMinimized()) amayaWin.restore();
+    amayaWin.focus();
+    return true;
+  }
+  try {
+    amayaWin = new BrowserWindow({
+      width: 1440, height: 900, minWidth: 960, minHeight: 640,
+      backgroundColor: '#05070f',
+      title: 'AMAYA IMEI Control Center',
+      autoHideMenuBar: true,
+      webPreferences: {
+        contextIsolation: true,
+        nodeIntegration: false,
+        spellcheck: false,
+        partition: 'amaya-control-center'
+      }
+    });
+    amayaWin.loadURL(`http://localhost:${PORT}/amaya-imei-control-center/`);
+    amayaWin.webContents.setWindowOpenHandler(({ url }) => {
+      if (/^https?:\/\//i.test(url)) shell.openExternal(url);
+      return { action: 'deny' };
+    });
+    amayaWin.on('closed', () => { amayaWin = null; });
+    return true;
+  } catch (e) {
+    process.stderr.write('[amaya] ' + (e && e.stack || e) + '\n');
+    return false;
+  }
+}
+
 function menu() {
   const isMac = process.platform === 'darwin';
   Menu.setApplicationMenu(Menu.buildFromTemplate([
@@ -96,8 +142,7 @@ function menu() {
     { label: 'File', submenu: [
       { label: 'Sync NSpector ledgers', accelerator: 'CmdOrCtrl+R', click: () => win && win.webContents.executeJavaScript(
           "fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(()=>location.reload())") },
-      { label: 'Reload Control Center', accelerator: 'CmdOrCtrl+Shift+R', click: () => win && win.webContents.executeJavaScript(
-          "document.getElementById('amaya-frame')?.contentWindow.location.reload()") },
+      { label: 'Open Control Center', accelerator: 'CmdOrCtrl+Shift+R', click: () => openControlCenter() },
       { type: 'separator' },
       { label: 'Open NSpector data folder', click: () => dataDir && shell.openPath(dataDir) },
       { label: 'Open AMAYA snapshot folder', click: () => shell.openPath(process.env.AMAYA_DIR || '') },
