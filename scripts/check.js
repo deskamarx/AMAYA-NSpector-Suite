@@ -8,7 +8,7 @@ const files = [
   'electron/main.js', 'electron/preload.js',
   'server/amaya.js', 'server/server.js', 'server/db.js', 'server/core.js',
   'server/reason.js', 'server/sync.js',
-  'web/nspector.js', 'web/shell.js', 'scripts/build.js'
+  'web/i18n.js', 'web/nspector.js', 'web/shell.js', 'scripts/build.js'
 ];
 let bad = 0;
 for (const f of files) {

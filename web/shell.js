@@ -6,24 +6,22 @@
   const $$ = s => Array.from(document.querySelectorAll(s));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
     ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-  const money = n => 'Tk ' + Math.round(n || 0).toLocaleString('en-IN');
-  const num = n => (n || 0).toLocaleString('en-IN');
-  const tb = n => {
-    n = n || 0;
-    if (n >= 10000000) return 'Tk ' + (n / 10000000).toFixed(2) + ' Cr';
-    if (n >= 100000) return 'Tk ' + (n / 100000).toFixed(2) + ' L';
-    if (n >= 1000) return 'Tk ' + (n / 1000).toFixed(0) + 'k';
-    return 'Tk ' + n.toLocaleString('en-IN');
-  };
+  const I = window.SuiteI18n;
+  const t = (k, v) => I.t(k, v);
+  const th = (k, v) => I.tHtml(k, v);
+  const tx = v => I.tx(v);
+  const money = n => I.money(n);
+  const num = n => I.number(n);
+  const tb = n => I.compact(n);
   const pct = (a, b) => b ? (a / b * 100) : 0;
   const slug = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   const TITLES = {
-    overview: ['Unified fleet overview', 'Two ledgers. One device truth.'],
-    lookup:   ['Cross-ledger lookup', 'One serial. Both evidence trails.'],
-    devices:  ['NSpector workspace', 'Device ledger & reasoning.'],
-    imei:     ['AMAYA workspace', 'IMEI Control Center.'],
-    sources:  ['Provenance', 'Data sources & methodology.']
+    overview: ['nav.overview', 'title.overview'],
+    lookup:   ['lookup.eyebrow', 'title.lookup'],
+    devices:  ['devices.eyebrow', 'title.devices'],
+    imei:     ['imei.eyebrow', 'title.imei'],
+    sources:  ['sources.eyebrow', 'title.sources']
   };
 
   const STATE_ORDER = ['Sold Delivered', 'Stock Transfer', 'Service', 'Return', 'Bad Bin', 'Pending Hold', 'Unknown'];
@@ -36,6 +34,7 @@
   let suggestIndex = -1;
   let suggestRows = [];
   let suggestInput = null;
+  let lookupDossier = null;
 
   // Electron's main window uses contextIsolation — never touch Node globals here.
   // The desktop build exposes a tiny, audited bridge via preload.js.
@@ -72,10 +71,11 @@
       if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     $$('.workspace').forEach(w => w.classList.toggle('active', w.dataset.ws === name));
-    const [eyebrow, title] = TITLES[name];
-    $('#ws-eyebrow').textContent = eyebrow;
+    const [eyebrowKey, titleKey] = TITLES[name];
+    const title = t(titleKey);
+    $('#ws-eyebrow').textContent = t(eyebrowKey);
     $('#ws-title').textContent = title;
-    document.title = title + ' · AMAYA × NSpector';
+    document.title = title + ' · ' + t('app.name');
     document.body.classList.toggle('ws-imei-active', name === 'imei');
     if (!fromHistory) {
       const target = '#' + name;
@@ -161,13 +161,13 @@
     if (!box || !suggestRows.length) { hideSuggestions(); return; }
     const prefix = input.id === 'gs-q' ? 'gs' : 'lk';
     box.innerHTML =
-      '<div class="suggest-head"><span>Matching devices</span><em>' + suggestRows.length + ' found</em></div>' +
+      '<div class="suggest-head"><span>' + esc(t('search.matching')) + '</span><em>' + esc(t('search.found', { n: num(suggestRows.length) })) + '</em></div>' +
       suggestRows.map((r, i) => `
         <button type="button" id="${prefix}-opt-${i}" class="suggest-item ${i === suggestIndex ? 'active' : ''}"
                 role="option" aria-selected="${i === suggestIndex}" data-serial="${esc(r.serial)}"
                 data-presence="${r.inNs && r.inAmaya ? 'both' : r.inNs ? 'nspector' : 'amaya'}">
           <i class="src-dot ${r.inNs && r.inAmaya ? 'both' : r.inNs ? 'nspector' : 'amaya'}"></i>
-          <span class="s-body"><b>${esc(r.serial)}</b><small>${esc(r.family || (r.amaya && r.amaya.product) || (r.inAmaya ? 'AMAYA asset' : 'NSpector dispatch'))}</small></span>
+          <span class="s-body"><b>${esc(r.serial)}</b><small>${esc(r.family || (r.amaya && r.amaya.product) || t(r.inAmaya ? 'search.amayaAsset' : 'search.nspectorDispatch'))}</small></span>
           <em>${r.inNs && r.inAmaya ? 'both' : r.inNs ? 'NS' : 'AM'}</em>
         </button>`).join('');
     box.hidden = false;
@@ -188,7 +188,7 @@
       suggestIndex = suggestRows.length ? 0 : -1;
       const box = suggestBox(input);
       if (!suggestRows.length) {
-        box.innerHTML = '<div class="suggest-empty"><b>No devices found</b>Try a different IMEI or serial.</div>';
+        box.innerHTML = '<div class="suggest-empty"><b>' + esc(t('search.noDevices')) + '</b>' + esc(t('search.noDevicesHint')) + '</div>';
         box.hidden = false;
         input.setAttribute('aria-expanded', 'true');
         input.removeAttribute('aria-activedescendant');
@@ -267,11 +267,11 @@
     try {
       overview = await api('/api/combo/overview');
     } catch (e) {
-      $('#ov-kpis').innerHTML = `<div class="kpi error">Overview data unavailable<span>${esc(e.message)}</span>
-        <button class="retry-btn" id="ov-retry">Try again</button></div>`;
+      $('#ov-kpis').innerHTML = `<div class="kpi error">${esc(t('ov.unavailable'))}<span>${esc(e.message)}</span>
+        <button class="retry-btn" id="ov-retry">${esc(t('ov.retry'))}</button></div>`;
       ['#ov-recon-body', '#ov-amaya-body', '#ov-ns-body', '#ov-critical-body', '#ov-sources-body'].forEach(sel => {
         const el = $(sel);
-        if (el) el.innerHTML = '<p class="hint">Waiting for a successful overview load.</p>';
+        if (el) el.innerHTML = '<p class="hint">' + esc(t('ov.waiting')) + '</p>';
       });
       const retry = $('#ov-retry');
       if (retry) retry.addEventListener('click', () => { retry.disabled = true; loadOverview(true); });
@@ -288,22 +288,22 @@
     const ov = d.overlap || {};
 
     const pctBoth = ov.union ? (ov.both / ov.union * 100) : 0;
-    $('#ov-lede').innerHTML =
-      `The NSpector dispatch ledger and the AMAYA IMEI Control Center now answer the same question together: ` +
-      `<b>${num(ov.both)} IMEIs appear in both</b> — ${num(ov.union)} distinct devices across ${num(st.dispatches)} ` +
-      `dispatch records and ${num(a.events)} workbook occurrences.`;
+    $('#ov-lede').innerHTML = th('overview.lede', {
+      both: num(ov.both), union: num(ov.union),
+      dispatches: num(st.dispatches), events: num(a.events)
+    });
 
     const orb = $('#ov-orb');
     orb.style.setProperty('--p', pctBoth.toFixed(1) + '%');
     $('#ov-match-pct').textContent = pctBoth.toFixed(1) + '%';
 
     const kpis = [
-      ['Distinct devices', num(ov.union), 'union of both ledgers', 'merged', ''],
-      ['Matched in both', num(ov.both), `${num(ov.nsOnly)} NSpector-only · ${num(ov.amayaOnly)} AMAYA-only`, 'both', ''],
-      ['NSpector findings', num(st.openFindings), `${num(st.findings)} total · ${tb(ex.open_total)} open exposure`, 'nspector', 'crit'],
-      ['AMAYA conflicts', num(a.conflicts), `${num(a.repeatIds)} repeat IDs · ${num(a.reviewQueue)} in review queue`, 'amaya', 'warn'],
-      ['NSpector serials', num(st.uniqueSerials), `${num(st.dispatches)} dispatch rows · ${num(st.dealers)} dealers`, 'nspector', ''],
-      ['AMAYA assets', num(a.assets), `${num(a.events)} events · ${Object.keys(a.sources || {}).length} workbooks`, 'amaya', 'acc']
+      [t('kpi.distinct'), num(ov.union), t('kpi.distinctSub'), 'merged', ''],
+      [t('kpi.matched'), num(ov.both), t('kpi.matchedSub', { ns:num(ov.nsOnly), am:num(ov.amayaOnly) }), 'both', ''],
+      [t('kpi.findings'), num(st.openFindings), t('kpi.findingsSub', { total:num(st.findings), value:tb(ex.open_total) }), 'nspector', 'crit'],
+      [t('kpi.conflicts'), num(a.conflicts), t('kpi.conflictsSub', { repeat:num(a.repeatIds), review:num(a.reviewQueue) }), 'amaya', 'warn'],
+      [t('kpi.serials'), num(st.uniqueSerials), t('kpi.serialsSub', { disp:num(st.dispatches), dealers:num(st.dealers) }), 'nspector', ''],
+      [t('kpi.assets'), num(a.assets), t('kpi.assetsSub', { events:num(a.events), books:num(Object.keys(a.sources || {}).length) }), 'amaya', 'acc']
     ];
     $('#ov-kpis').innerHTML = kpis.map(([label, value, sub, source, tone]) => `
       <div class="kpi ${tone}">
@@ -314,9 +314,9 @@
 
     // reconciliation
     const rows = [
-      ['Both ledgers', ov.both, 'both', 'match'],
-      ['NSpector only', ov.nsOnly, 'nspector', 'ns'],
-      ['AMAYA only', ov.amayaOnly, 'amaya', 'amaya']
+      [t('recon.both'), ov.both, 'both', 'match'],
+      [t('recon.ns'), ov.nsOnly, 'nspector', 'ns'],
+      [t('recon.am'), ov.amayaOnly, 'amaya', 'amaya']
     ];
     const max = Math.max(1, ov.both || 0, ov.nsOnly || 0, ov.amayaOnly || 0);
     $('#ov-recon-body').innerHTML = `
@@ -329,10 +329,10 @@
           </div>`).join('')}
       </div>
       <div class="overlap-sample">
-        <span class="eyebrow">Sample exact matches</span>
+        <span class="eyebrow">${esc(t('recon.sample'))}</span>
         <div class="chip-row">
           ${(ov.sample || []).map(s => `<button class="mono-chip" data-serial="${esc(s)}">${esc(s)}</button>`).join('') ||
-            '<span class="hint">No exact matches in this snapshot.</span>'}
+            '<span class="hint">' + esc(t('recon.none')) + '</span>'}
         </div>
       </div>`;
 
@@ -343,16 +343,16 @@
       <div class="mini-bars">
         ${STATE_ORDER.filter(k => sc[k] != null).map(k => `
           <div class="mini-bar">
-            <span>${esc(k)}</span>
+            <span>${esc(I.state(k))}</span>
             <i><b class="state-${slug(k)}" style="width:${(sc[k] / maxState * 100).toFixed(1)}%"></b></i>
             <em>${num(sc[k])}</em>
           </div>`).join('')}
       </div>
       <div class="mini-meta">
-        <span>Snapshot <b>${esc(a.dataVersion || '—')}</b></span>
-        <span>Built <b>${esc((a.builtAt || '').slice(0, 10) || '—')}</b></span>
+        <span>${esc(t('am.snapshot'))} <b>${esc(a.dataVersion || '—')}</b></span>
+        <span>${esc(t('am.built'))} <b>${esc(I.date((a.builtAt || '').slice(0, 10)))}</b></span>
       </div>
-      <button class="wide-btn" data-goto="imei">Open IMEI Control Center →</button>`;
+      <button class="wide-btn" data-goto="imei">${esc(t('am.openCenter'))}</button>`;
 
     // ns panel
     const byKind = (ns.byKind || []).slice(0, 5);
@@ -367,11 +367,11 @@
           </div>`).join('')}
       </div>
       <div class="mini-meta">
-        <span>Dispatches <b>${num(st.dispatches)}</b></span>
-        <span>Returns <b>${num(st.returns)}</b></span>
-        <span>Dealers <b>${num(st.dealers)}</b></span>
+        <span>${esc(t('ns.dispatches'))} <b>${num(st.dispatches)}</b></span>
+        <span>${esc(t('ns.returns'))} <b>${num(st.returns)}</b></span>
+        <span>${esc(t('ns.dealers'))} <b>${num(st.dealers)}</b></span>
       </div>
-      <button class="wide-btn" data-goto="devices">Open device ledger →</button>`;
+      <button class="wide-btn" data-goto="devices">${esc(t('ns.openLedger'))}</button>`;
 
     // critical
     const list = ns.topCritical || [];
@@ -383,13 +383,13 @@
           <span>${esc(f.serial || f.dealer || f.family || '')}${f.value_at_risk ? ' · ' + money(f.value_at_risk) : ''}</span>
         </div>
         <em>${num(f.score)}</em>
-      </div>`).join('') : '<p class="hint">No open critical or high findings.</p>';
+      </div>`).join('') : '<p class="hint">' + esc(t('critical.none')) + '</p>';
 
     // sources strip
     const srcCards = [
-      ['NSpector', num(st.dispatches) + ' dispatch rows', 'SQLite ingest of 7 CSV / TXT exports', 'nspector', 'devices'],
-      ['AMAYA Control Center', num(a.assets) + ' assets · ' + num(a.events) + ' events', 'Generated from ' + (a.generatedFrom || 'imei_deduplicated_ledger.xlsx'), 'amaya', 'imei'],
-      ['Merged index', num(ov.both) + ' exact matches', 'Full IMEI equality, no fuzzy matching', 'both', 'lookup']
+      [t('src.ns'), t('src.nsBig', { n:num(st.dispatches) }), t('src.nsSub'), 'nspector', 'devices'],
+      [t('src.am'), t('src.amBig', { assets:num(a.assets), events:num(a.events) }), t('src.amSub', { file:a.generatedFrom || 'imei_deduplicated_ledger.xlsx' }), 'amaya', 'imei'],
+      [t('src.merged'), t('src.mergedBig', { n:num(ov.both) }), t('src.mergedSub'), 'both', 'lookup']
     ];
     $('#ov-sources-body').innerHTML = srcCards.map(([title, big, sub, cls, go]) => `
       <button class="source-card" data-goto="${go}">
@@ -401,15 +401,7 @@
   }
 
   function KIND_LABEL(k) {
-    return ({
-      duplicate_cross: 'Two dealers',
-      duplicate_multi: 'Three+ dealers',
-      orphan_return: 'Never dispatched',
-      imei_lock: 'IMEI lock / mismatch',
-      no_serial_return: 'Return, no serial',
-      luhn_invalid: 'Invalid check digit',
-      tac_conflict: 'Prefix conflict'
-    })[k] || k;
+    return I.kind(k);
   }
 
   // critical rows open the same sheet NSpector uses
@@ -444,22 +436,23 @@
   async function runLookup(serial) {
     const out = $('#lookup-out');
     const seq = ++lookupSeq;
-    out.innerHTML = `<div class="panel glass"><div class="inline-load"><i></i><span>Reading both ledgers for ${esc(serial)}…</span></div></div>`;
+    out.innerHTML = `<div class="panel glass"><div class="inline-load"><i></i><span>${esc(t('lookup.reading', { serial }))}</span></div></div>`;
     let d;
     try { d = await api('/api/combo/asset/' + encodeURIComponent(serial)); }
     catch (err) {
-      if (seq === lookupSeq) out.innerHTML = `<div class="panel glass"><h3>Lookup failed</h3><p class="hint">${esc(err.message)}</p></div>`;
+      if (seq === lookupSeq) out.innerHTML = `<div class="panel glass"><h3>${esc(t('lookup.failed'))}</h3><p class="hint">${esc(err.message)}</p></div>`;
       return;
     }
     if (seq !== lookupSeq) return;
+    lookupDossier = d;
     renderDossier(d);
   }
 
   function presenceChip(p) {
-    if (p === 'both') return '<span class="presence both">In both ledgers</span>';
-    if (p === 'nspector') return '<span class="presence nspector">NSpector only</span>';
-    if (p === 'amaya') return '<span class="presence amaya">AMAYA only</span>';
-    return '<span class="presence none">Not found</span>';
+    if (p === 'both') return '<span class="presence both">' + esc(t('presence.both')) + '</span>';
+    if (p === 'nspector') return '<span class="presence nspector">' + esc(t('presence.ns')) + '</span>';
+    if (p === 'amaya') return '<span class="presence amaya">' + esc(t('presence.am')) + '</span>';
+    return '<span class="presence none">' + esc(t('presence.none')) + '</span>';
   }
 
   function renderDossier(d) {
@@ -471,11 +464,11 @@
       out.innerHTML = `
         <div class="panel glass empty-dossier">
           <div class="empty-glyph">∅</div>
-          <h3>${esc(serial)} is not in either ledger</h3>
-          <p class="hint">No dispatch, return, finding, asset or movement event carries this serial. Check for a typo, or note that the unit may predate both snapshots.</p>
+          <h3>${esc(t('dossier.notFound', { serial }))}</h3>
+          <p class="hint">${esc(t('dossier.notFoundHint'))}</p>
           <div class="empty-actions">
-            <button data-goto="devices">Open NSpector inspector</button>
-            <button data-goto="imei">Search the Control Center</button>
+            <button data-goto="devices">${esc(t('dossier.openInspector'))}</button>
+            <button data-goto="imei">${esc(t('dossier.searchCenter'))}</button>
           </div>
         </div>`;
       return;
@@ -489,35 +482,35 @@
     const header = `
       <div class="dossier-head panel glass">
         <div class="dossier-id">
-          <span class="eyebrow">Device dossier</span>
+          <span class="eyebrow">${esc(t('dossier.eyebrow'))}</span>
           <h2 class="mono">${esc(serial)}</h2>
           <div class="cmeta">
             ${presenceChip(d.presence)}
             ${f0 ? `<span class="tag">${esc(f0.family || f0.sku || '')}</span>` : ''}
             ${(a && a.product) ? `<span class="tag acc">${esc(a.product)}</span>` : ''}
-            ${ns.luhn === true ? '<span class="tag ok">check digit valid</span>' :
-              ns.luhn === false ? '<span class="tag crit">check digit invalid</span>' : ''}
+            ${ns.luhn === true ? '<span class="tag ok">' + esc(t('dossier.checkValid')) + '</span>' :
+              ns.luhn === false ? '<span class="tag crit">' + esc(t('dossier.checkInvalid')) + '</span>' : ''}
             ${ns.tac ? `<span class="tag mono">TAC ${esc(ns.tac)}</span>` : ''}
             ${(a && a.state) ? `<span class="tag state-tag state-${slug(a.state)}">${esc(a.state)}</span>` : ''}
-            ${(a && a.conflict) ? '<span class="tag crit">AMAYA conflict</span>' : ''}
-            ${(a && a.repeat) ? '<span class="tag high">repeat ID</span>' : ''}
+            ${(a && a.conflict) ? '<span class="tag crit">' + esc(t('dossier.conflict')) + '</span>' : ''}
+            ${(a && a.repeat) ? '<span class="tag high">' + esc(t('dossier.repeat')) + '</span>' : ''}
           </div>
         </div>
         <div class="dossier-actions">
-          ${nsFound ? `<button data-ns-inspect="${esc(serial)}">Open in NSpector inspector</button>` : ''}
-          ${amFound ? `<button class="primary" data-copy="${esc(serial)}">Copy for Control Center</button>` : ''}
+          ${nsFound ? `<button data-ns-inspect="${esc(serial)}">${esc(t('dossier.openNs'))}</button>` : ''}
+          ${amFound ? `<button class="primary" data-copy="${esc(serial)}">${esc(t('dossier.copy'))}</button>` : ''}
         </div>
       </div>`;
 
     out.innerHTML = header + `
       <div class="dossier-grid">
         <div class="dossier-col">
-          <div class="col-head"><span class="src-dot nspector"></span><div><b>NSpector</b><small>Custody, returns & reasoning</small></div></div>
-          ${nsFound ? nsColumn(ns) : emptyCol('Not present in the NSpector dispatch ledger or returns.')}
+          <div class="col-head"><span class="src-dot nspector"></span><div><b>${esc(t('dossier.nsTitle'))}</b><small>${esc(t('dossier.nsSub'))}</small></div></div>
+          ${nsFound ? nsColumn(ns) : emptyCol(t('dossier.noNs'))}
         </div>
         <div class="dossier-col">
-          <div class="col-head"><span class="src-dot amaya"></span><div><b>AMAYA IMEI Control Center</b><small>Workbook occurrences & lifecycle</small></div></div>
-          ${amFound ? amayaColumn(a) : emptyCol('Not present in the AMAYA asset snapshot.')}
+          <div class="col-head"><span class="src-dot amaya"></span><div><b>${esc(t('dossier.amTitle'))}</b><small>${esc(t('dossier.amSub'))}</small></div></div>
+          ${amFound ? amayaColumn(a) : emptyCol(t('dossier.noAm'))}
         </div>
       </div>`;
 
@@ -540,8 +533,8 @@
       showWorkspace('imei');
       if (window.SuiteOpenControlCenter) window.SuiteOpenControlCenter(true);
       toast(copied
-        ? 'Serial copied — paste it into the Control Center search.'
-        : 'Control Center opened — copy the serial above to continue.',
+        ? t('dossier.copyHint', {}, 'Serial copied — paste it into the Control Center search.')
+        : t('dossier.copyFallback', {}, 'Control Center opened — copy the serial above to continue.'),
         copied ? 'success' : 'warn');
     }));
   }
@@ -558,26 +551,26 @@
     let html = '';
 
     html += `<div class="panel glass">
-      <div class="panel-top"><h3>Ledger summary</h3><span class="count-pill">${num(disp.length)} dispatch · ${num(rets.length)} return</span></div>
+      <div class="panel-top"><h3>${esc(t('ns.summary'))}</h3><span class="count-pill">${esc(t('ns.count', { disp:num(disp.length), ret:num(rets.length) }))}</span></div>
       <dl class="kv">
-        <dt>Serial kind</dt><dd>${esc(ns.serialKind || '—')}</dd>
-        <dt>Check digit</dt><dd>${ns.luhn === true ? 'Valid' : ns.luhn === false ? 'Invalid' : 'Not applicable'}</dd>
+        <dt>${esc(t('ns.serialKind'))}</dt><dd>${esc(tx(ns.serialKind) || '—')}</dd>
+        <dt>${esc(t('ns.checkDigit'))}</dt><dd>${esc(ns.luhn === true ? t('ns.valid') : ns.luhn === false ? t('ns.invalid') : t('ns.na'))}</dd>
         <dt>TAC</dt><dd class="mono">${esc(ns.tac || '—')}</dd>
-        ${ns.price ? `<dt>Observed price</dt><dd>${money(ns.price.typical)} <span class="dim">(${money(ns.price.min)}–${money(ns.price.max)}, ${ns.price.samples}×)</span></dd>` : ''}
-        ${ns.relatedCount ? `<dt>Blast radius</dt><dd>${num(ns.relatedCount)} other serials shared these dealers</dd>` : ''}
+        ${ns.price ? `<dt>${esc(t('ns.price'))}</dt><dd>${money(ns.price.typical)} <span class="dim">(${money(ns.price.min)}–${money(ns.price.max)}, ${ns.price.samples}×)</span></dd>` : ''}
+        ${ns.relatedCount ? `<dt>${esc(t('ns.blast'))}</dt><dd>${esc(t('ns.blastSub', { n:num(ns.relatedCount) }))}</dd>` : ''}
       </dl>
     </div>`;
 
     if (disp.length) {
       html += `<div class="panel glass">
-        <div class="panel-top"><h3>Dispatch trail</h3><span class="count-pill">${num(disp.length)} stops</span></div>
+        <div class="panel-top"><h3>${esc(t('ns.trail'))}</h3><span class="count-pill">${esc(t('ns.stops', { n:num(disp.length) }))}</span></div>
         <div class="trail">${disp.map((x, i) => `
           <div class="trail-step">
-            <span class="trail-when">${esc((x.date || '').toString() || 'undated')}</span>
+            <span class="trail-when">${esc(I.date((x.date || '').toString()) === '—' ? t('ns.undated') : I.date((x.date || '').toString()))}</span>
             <span class="trail-dot"></span>
             <div class="trail-copy">
-              <b>${esc(x.party || 'Unknown dealer')}</b>
-              <span>${esc(x.wing || '—')} wing · ${esc(x.family || x.sku || '')} · ${esc(x.source || '')}</span>
+              <b>${esc(x.party || t('ns.unknownDealer'))}</b>
+              <span>${esc(x.wing || '—')} ${esc(t('ns.wing'))} · ${esc(x.family || x.sku || '')} · ${esc(x.source || '')}</span>
             </div>
           </div>`).join('')}</div>
       </div>`;
@@ -585,17 +578,17 @@
 
     if (dx) {
       html += `<div class="panel glass">
-        <div class="panel-top"><h3>Reasoning</h3><span class="count-pill ${esc(dx.confidence)}">${esc(dx.confidence)} confidence</span></div>
-        <div class="callout bad"><b>Diagnosis</b>${esc(dx.diagnosis || '')}</div>
+        <div class="panel-top"><h3>${esc(t('ns.reasoning'))}</h3><span class="count-pill ${esc(dx.confidence)}">${esc(t('ns.confidence', { c:I.confidence(dx.confidence) }))}</span></div>
+        <div class="callout bad"><b>${esc(t('ns.diagnosis'))}</b>${esc(tx(dx.diagnosis || ''))}</div>
         ${(dx.evidence || []).length ? `<div class="ev">${dx.evidence.map(e => `
           <div class="evrow ${esc(e.weight)}"><span class="k">${esc(e.label)}</span><span class="d">${esc(e.detail)}</span></div>`).join('')}</div>` : ''}
-        ${(dx.nextActions || []).length ? `<h4 class="mini-h">Do this next</h4><ol class="actionlist">${dx.nextActions.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+        ${(dx.nextActions || []).length ? `<h4 class="mini-h">${esc(t('ns.doNext'))}</h4><ol class="actionlist">${dx.nextActions.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
       </div>`;
     }
 
     if (rets.length) {
       html += `<div class="panel glass">
-        <div class="panel-top"><h3>Returns</h3><span class="count-pill">${num(rets.length)}</span></div>
+        <div class="panel-top"><h3>${esc(t('ns.returns'))}</h3><span class="count-pill">${num(rets.length)}</span></div>
         <div class="trail">${rets.map(r => `
           <div class="trail-step">
             <span class="trail-when">${esc(r.rdate || '—')}</span>
@@ -608,7 +601,7 @@
 
     if (finds.length) {
       html += `<div class="panel glass">
-        <div class="panel-top"><h3>Findings on this serial</h3><span class="count-pill">${num(finds.length)}</span></div>
+        <div class="panel-top"><h3>${esc(t('ns.findings'))}</h3><span class="count-pill">${num(finds.length)}</span></div>
         <div class="mini-findings">${finds.map(f => `
           <div class="mini-finding sev-${esc(f.severity)}">
             <b>${esc(f.title)}</b>
@@ -622,47 +615,47 @@
 
   function amayaColumn(a) {
     let html = `<div class="panel glass">
-      <div class="panel-top"><h3>Asset ledger</h3><span class="count-pill">${num(a.occurrences)} occurrences</span></div>
+      <div class="panel-top"><h3>${esc(t('am.ledger'))}</h3><span class="count-pill">${esc(t('am.occurrences', { n:num(a.occurrences) }))}</span></div>
       <dl class="kv">
-        <dt>Product</dt><dd>${esc(a.product || 'Not recorded')}</dd>
-        <dt>Terminal state</dt><dd><span class="state-chip state-${slug(a.state)}">${esc(a.state)}</span></dd>
-        <dt>Date range</dt><dd>${esc(a.first || 'undated')} → ${esc(a.last || 'undated')}</dd>
-        <dt>Workbook tabs</dt><dd>${num(a.tabs)}</dd>
-        <dt>Flags</dt><dd>${a.conflict ? 'Conflict' : 'No conflict'}${a.repeat ? ' · repeat ID' : ''}</dd>
-        ${a.evidenceTab ? `<dt>Evidence citation</dt><dd>${esc(a.evidenceTab)} · row ${num(a.evidenceRow)}</dd>` : ''}
+        <dt>Product</dt><dd>${esc(a.product || t('am.notRecorded'))}</dd>
+        <dt>${esc(t('am.terminal'))}</dt><dd><span class="state-chip state-${slug(a.state)}">${esc(I.state(a.state))}</span></dd>
+        <dt>${esc(t('am.range'))}</dt><dd>${esc(a.first || t('ns.undated'))} → ${esc(a.last || t('ns.undated'))}</dd>
+        <dt>${esc(t('am.tabs'))}</dt><dd>${num(a.tabs)}</dd>
+        <dt>${esc(t('am.flags'))}</dt><dd>${a.conflict ? esc(t('dossier.conflict')) : esc(t('am.noConflict'))}${a.repeat ? ' · ' + esc(t('am.repeatShort')) : ''}</dd>
+        ${a.evidenceTab ? `<dt>${esc(t('am.citation'))}</dt><dd>${esc(a.evidenceTab)} · ${esc(t('am.row'))} ${num(a.evidenceRow)}</dd>` : ''}
       </dl>
-      <div class="state-strip">${(a.states || []).map(s => `<span class="state-chip state-${slug(s)}">${esc(s)}</span>`).join('')}</div>
+      <div class="state-strip">${(a.states || []).map(s => `<span class="state-chip state-${slug(s)}">${esc(I.state(s))}</span>`).join('')}</div>
     </div>`;
 
     const ev = a.events || [];
     html += `<div class="panel glass">
-      <div class="panel-top"><h3>Movement evidence</h3><span class="count-pill">${num(ev.length)} events</span></div>
+      <div class="panel-top"><h3>${esc(t('am.movement'))}</h3><span class="count-pill">${esc(t('am.events', { n:num(ev.length) }))}</span></div>
       ${ev.length ? `<div class="amaya-trail">${ev.map(e => `
         <div class="amaya-event${e.undated ? ' undated' : ''}">
-          <div class="ae-date">${esc(e.date || 'undated')}</div>
+          <div class="ae-date">${esc(e.date || t('ns.undated'))}</div>
           <div class="ae-body">
             <div class="ae-head">
               <b class="mono">${esc(e.tab || '—')}</b>
-              <span class="ae-row">row ${num(e.row)}</span>
+              <span class="ae-row">${esc(t('am.row'))} ${num(e.row)}</span>
               ${e.source ? (e.sourceUrl
                 ? `<a class="ae-src" href="${esc(e.sourceUrl)}" target="_blank" rel="noreferrer">${esc(e.source)}</a>`
                 : `<span class="ae-src">${esc(e.source)}</span>`) : ''}
             </div>
             ${e.product ? `<div class="ae-product">${esc(e.product)}</div>` : ''}
-            <div class="state-strip">${(e.states || []).map(s => `<span class="state-chip state-${slug(s)}">${esc(s)}</span>`).join('')}</div>
+            <div class="state-strip">${(e.states || []).map(s => `<span class="state-chip state-${slug(s)}">${esc(I.state(s))}</span>`).join('')}</div>
           </div>
-        </div>`).join('')}</div>` : '<p class="hint">No movement events recorded for this asset.</p>'}
+        </div>`).join('')}</div>` : '<p class="hint">' + esc(t('am.noEvents')) + '</p>'}
     </div>`;
 
     if (a.occurrences >= 3 || a.conflict || a.repeat) {
       html += `<div class="panel glass">
         <div class="interpretation">
-          <b>What this means</b>
+          <b>${esc(t('am.means'))}</b>
           <p>${a.conflict
-            ? 'The source workbooks disagree about this device. Treat the AMAYA review queue entry as the authoritative follow-up.'
+            ? t('am.meanConflict')
             : a.repeat
-            ? 'This serial repeats across workbook occurrences. Compare the earliest and latest state before accepting the terminal state.'
-            : 'The device appears across multiple workbook occurrences. The timeline above is the evidence trail; the ledger state is the conclusion.'}</p>
+            ? t('am.meanRepeat')
+            : t('am.meanMultiple')}</p>
         </div>
       </div>`;
     }
@@ -675,12 +668,12 @@
   function openControlCenter(silent) {
     if (desktop && window.amayaShell.openControlCenter) {
       Promise.resolve(window.amayaShell.openControlCenter())
-        .then(ok => { if (!silent) toast(ok ? 'Control Center opened in its own window' : 'Could not open the Control Center', ok ? 'success' : 'error'); })
-        .catch(() => { if (!silent) toast('Could not open the Control Center', 'error'); });
+        .then(ok => { if (!silent) toast(ok ? t('control.window') : t('control.failed'), ok ? 'success' : 'error'); })
+        .catch(() => { if (!silent) toast(t('control.failed'), 'error'); });
     } else {
       const w = window.open(AMA_PATH, '_blank');
       if (w) { try { w.opener = null; } catch (e) {} }
-      if (!silent) toast(w ? 'Control Center opened in a new tab' : 'Allow pop-ups to open the Control Center', w ? 'success' : 'warn');
+      if (!silent) toast(w ? t('control.tab') : t('control.popups'), w ? 'success' : 'warn');
     }
   }
   window.SuiteOpenControlCenter = openControlCenter;
@@ -688,11 +681,11 @@
   $('#frame-reload').addEventListener('click', () => {
     if (desktop && window.amayaShell.reloadControlCenter) {
       Promise.resolve(window.amayaShell.reloadControlCenter())
-        .then(() => toast('Control Center window reloaded'));
+        .then(() => toast(t('control.reloaded')));
     } else {
       overview = null;
       renderAmaWorkspace();
-      toast('Snapshot metrics refreshed');
+      toast(t('control.refreshed'));
     }
   });
 
@@ -702,12 +695,12 @@
       overview = d;
       paintAma(d.amaya || {});
     }).catch(e => {
-      $('#frame-note').textContent = 'Snapshot unavailable';
-      $('#ama-review').textContent = 'Metrics could not be loaded.';
+      $('#frame-note').textContent = t('ama.unavailable');
+      $('#ama-review').textContent = t('ama.metrics');
       $('#ama-states').innerHTML = '';
       $('#ama-snapshot-note').textContent = '';
-      $('#ama-stats').innerHTML = `<div class="kpi error">Snapshot unavailable<span>${esc(e.message)}</span>
-        <button class="retry-btn" id="ama-retry">Try again</button></div>`;
+      $('#ama-stats').innerHTML = `<div class="kpi error">${esc(t('ama.unavailable'))}<span>${esc(e.message)}</span>
+        <button class="retry-btn" id="ama-retry">${esc(t('ov.retry'))}</button></div>`;
       const r = $('#ama-retry');
       if (r) r.addEventListener('click', () => { overview = null; renderAmaWorkspace(); });
     });
@@ -715,13 +708,13 @@
 
   function paintAma(a) {
     const d = a.derived || {};
-    $('#frame-note').textContent = num(a.assets) + ' assets · ' + num(a.events) + ' movement events';
+    $('#frame-note').textContent = t('src.amBig', { assets:num(a.assets), events:num(a.events) });
 
     const cards = [
-      ['⚡', 'Unique Assets', a.assets, 'one-row deduplicated ledger'],
-      ['↩', 'Repeated IDs', a.repeatIds, 'present in 2+ source tabs'],
-      ['⇄', 'Movement Conflicts', a.conflicts, 'states disagree across evidence'],
-      ['◷', 'No Terminal State', d.assetsWithoutTerminalState, 'of the ledger cannot be resolved']
+      ['⚡', t('ama.unique'), a.assets, t('ama.uniqueSub')],
+      ['↩', t('ama.repeat'), a.repeatIds, t('ama.repeatSub')],
+      ['⇄', t('ama.conflictMetric'), a.conflicts, t('ama.conflictSub')],
+      ['◷', t('ama.noTerminal'), d.assetsWithoutTerminalState, t('ama.noTerminalSub')]
     ];
     $('#ama-stats').innerHTML = cards.map(([icon, label, value, sub]) => `
       <div class="stat-card">
@@ -732,9 +725,9 @@
       </div>`).join('');
 
     $('#ama-review').innerHTML =
-      `<span><b>${num(d.assetsWithoutTerminalState || 0)}</b> outside the review queue</span>` +
-      `<span><b>${num(a.emptyTabs || 0)}</b> empty tabs</span>` +
-      `<span><b>${num(a.reviewQueue || 0)}</b> flagged for review</span>`;
+      `<span><b>${num(d.assetsWithoutTerminalState || 0)}</b> ${esc(t('ama.outside', { n:'' }).trim())}</span>` +
+      `<span><b>${num(a.emptyTabs || 0)}</b> ${esc(t('ama.emptyTabs', { n:'' }).trim())}</span>` +
+      `<span><b>${num(a.reviewQueue || 0)}</b> ${esc(t('ama.flagged', { n:'' }).trim())}</span>`;
 
     const entries = Object.entries(a.stateCounts || {}).sort((x, y) => y[1] - x[1]);
     const total = a.assets || 1;
@@ -742,12 +735,11 @@
       <div class="kpi ${i === 0 ? 'lead' : ''}">
         <div class="num">${num(count)}</div>
         <div class="label">${esc(name)}</div>
-        <div class="pct">${pct(count, total).toFixed(1)}%</div>
-      </div>`).join('') || '<p class="hint">No state data in this snapshot.</p>';
+        <div class="pct">${new Intl.NumberFormat(I.locale === 'bn' ? 'bn-BD' : I.locale === 'zh' ? 'zh-CN' : 'en-IN', { maximumFractionDigits:1 }).format(pct(count, total))}%</div>
+      </div>`).join('') || '<p class="hint">' + esc(t('ama.noStates')) + '</p>';
 
     $('#ama-snapshot-note').textContent =
-      'Snapshot ' + (a.dataVersion || '—') + ' · built ' + ((a.builtAt || '').slice(0, 10) || '—') +
-      ' · source ' + (a.generatedFrom || '—');
+      t('ama.note', { v:a.dataVersion || '—', d:I.date((a.builtAt || '').slice(0, 10)), f:a.generatedFrom || '—' });
   }
 
   // ---------------------------------------------------------------- sources
@@ -755,7 +747,7 @@
     if (sources && !force) return renderSources();
     try { sources = await api('/api/combo/sources'); }
     catch (e) {
-      $('#sources-out').innerHTML = `<div class="panel glass"><h3>Source inventory unavailable</h3><p class="hint">${esc(e.message)}</p></div>`;
+      $('#sources-out').innerHTML = `<div class="panel glass"><h3>${esc(t('sources.unavailable'))}</h3><p class="hint">${esc(e.message)}</p></div>`;
       return;
     }
     renderSources();
@@ -766,61 +758,59 @@
     if (!d) return;
     const a = d.amaya || {};
     const srcEntries = Object.entries(a.sources || {});
-    $('#src-data-version').textContent = 'Snapshot ' + (a.dataVersion || '—') + ' · built ' + ((a.builtAt || '').slice(0, 10) || '—');
+    $('#src-data-version').textContent = t('am.snapshot') + ' ' + (a.dataVersion || '—') + ' · ' + t('am.built') + ' ' + I.date((a.builtAt || '').slice(0, 10));
     $('#sources-out').innerHTML = `
       <div class="src-grid">
         <div class="panel glass">
-          <div class="panel-top"><h3>NSpector ingest</h3><span class="count-pill">${num((d.files || []).length)} files</span></div>
-          <p class="hint">Copied to the app's user-data folder on first run, ingested into SQLite, then analysed by the findings engine. Edits stay local.</p>
+          <div class="panel-top"><h3>${esc(t('sources.ingest'))}</h3><span class="count-pill">${esc(t('sources.files', { n:num((d.files || []).length) }))}</span></div>
+          <p class="hint">${esc(t('sources.ingestHint'))}</p>
           <div class="file-list">
             ${(d.files || []).map(f => `
               <div class="file-row">
                 <b class="mono">${esc(f.name)}</b>
-                <span>${(f.bytes / 1024).toFixed(0)} KB · ${esc(f.modified.slice(0, 10))}</span>
-              </div>`).join('') || '<p class="hint">No source files found.</p>'}
+                <span>${(f.bytes / 1024).toFixed(0)} KB · ${esc(I.date(f.modified.slice(0, 10)))}</span>
+              </div>`).join('') || '<p class="hint">' + esc(t('sources.noFiles')) + '</p>'}
           </div>
         </div>
         <div class="panel glass">
-          <div class="panel-top"><h3>AMAYA snapshot</h3><span class="count-pill">v${esc(a.dataVersion || '—')}</span></div>
-          <p class="hint">Generated from <b>${esc(a.generatedFrom || '—')}</b> on ${esc((a.builtAt || '').slice(0, 10) || '—')}. The Control Center is served unmodified from this snapshot.</p>
+          <div class="panel-top"><h3>${esc(t('sources.snapshot'))}</h3><span class="count-pill">v${esc(a.dataVersion || '—')}</span></div>
+          <p class="hint">${th('sources.generated', { file:a.generatedFrom || '—', date:I.date((a.builtAt || '').slice(0, 10)) })}</p>
           <div class="src-grid-inner">
-            <div class="mini-stat"><b>${num(a.assets)}</b><span>assets</span></div>
-            <div class="mini-stat"><b>${num(a.events)}</b><span>events</span></div>
-            <div class="mini-stat"><b>${num(a.conflicts)}</b><span>conflicts</span></div>
-            <div class="mini-stat"><b>${num(a.repeatIds)}</b><span>repeat IDs</span></div>
+            <div class="mini-stat"><b>${num(a.assets)}</b><span>${esc(t('sources.assets'))}</span></div>
+            <div class="mini-stat"><b>${num(a.events)}</b><span>${esc(t('sources.events'))}</span></div>
+            <div class="mini-stat"><b>${num(a.conflicts)}</b><span>${esc(t('sources.conflicts'))}</span></div>
+            <div class="mini-stat"><b>${num(a.repeatIds)}</b><span>${esc(t('sources.repeats'))}</span></div>
           </div>
         </div>
       </div>
 
       <div class="panel glass">
-        <h3>Source workbooks</h3>
-        <p class="hint">The AMAYA snapshot cites four workbooks. Links open in your browser; the app itself never calls out to them.</p>
+        <h3>${esc(t('sources.workbooks'))}</h3>
+        <p class="hint">${esc(t('sources.workbooksHint'))}</p>
         <div class="workbook-grid">
           ${srcEntries.map(([key, s]) => `
             <a class="workbook-card" href="${esc(s.url)}" target="_blank" rel="noreferrer">
               <span class="book-index">${esc(key)}</span>
               <b>${esc(s.name)}</b>
-              <small>Open source workbook →</small>
+              <small>${esc(t('sources.openBook'))}</small>
             </a>`).join('')}
         </div>
       </div>
 
       <div class="panel glass">
-        <h3>Methodology notes</h3>
+        <h3>${esc(t('sources.method'))}</h3>
         <div class="method-grid">
-          <div class="method-card"><b>Exact matching only</b><p>An IMEI is "matched" when the same 15-character string exists in both ledgers. There is no fuzzy, phonetic or TAC-prefix matching in the reconciliation count.</p></div>
-          <div class="method-card"><b>Values are observed</b><p>NSpector exposure uses prices logged on your own return records. AMAYA states come from the workbook snapshot's resolved column.</p></div>
-          <div class="method-card"><b>Findings are reporting items</b><p>A duplicate is usually an unclosed return, not theft. The owner and status on a finding are what make it actionable.</p></div>
-          <div class="method-card"><b>Offline by design</b><p>Fonts, snapshots and code are bundled. The desktop app serves everything from localhost on your machine.</p></div>
+          <div class="method-card"><b>${esc(t('method.exactTitle'))}</b><p>${esc(t('method.exactBody'))}</p></div>
+          <div class="method-card"><b>${esc(t('method.observedTitle'))}</b><p>${esc(t('method.observedBody'))}</p></div>
+          <div class="method-card"><b>${esc(t('method.findingsTitle'))}</b><p>${esc(t('method.findingsBody'))}</p></div>
+          <div class="method-card"><b>${esc(t('method.offlineTitle'))}</b><p>${esc(t('method.offlineBody'))}</p></div>
         </div>
       </div>`;
   }
 
   // ---------------------------------------------------------------- boot
   const rv = $('#rail-version');
-  if (rv) rv.textContent = desktop
-    ? 'v1.0.0 · offline · local engine'
-    : 'v1.0.0 · live web instance';
+  if (rv) rv.textContent = desktop ? t('rail.versionOffline') : t('rail.versionWeb');
 
   // Let the NSpector sync action invalidate the merged caches too.
   window.SuiteRefresh = function () {
@@ -829,6 +819,14 @@
     if (current === 'sources') loadSources(true);
     if (current === 'imei') renderAmaWorkspace();
   };
+
+  window.addEventListener('suite:localechange', () => {
+    showWorkspace(current, true);
+    if (lookupDossier) renderDossier(lookupDossier);
+    if (desktop && window.amayaShell.reloadControlCenter) {
+      Promise.resolve(window.amayaShell.reloadControlCenter()).catch(() => {});
+    }
+  });
 
   const initial = (location.hash || '').replace('#', '');
   showWorkspace(TITLES[initial] ? initial : 'overview');

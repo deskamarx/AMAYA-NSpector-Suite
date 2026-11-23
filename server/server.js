@@ -186,7 +186,7 @@ app.use(requestLogger);
 app.use(cors(corsOptions));
 app.use(compressionMiddleware);
 app.use(express.json({ limit: config.maxRequestSize }));
-app.use(rateLimit(config.rateLimitWindowMs, config.rateLimitMax));
+app.use('/api', rateLimit(config.rateLimitWindowMs, config.rateLimitMax));
 
 // ---------- AMAYA Control Center ----------
 let amayaReady = false;

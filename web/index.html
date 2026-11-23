@@ -5,58 +5,58 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#05070f">
-<meta name="description" content="AMAYA × NSpector — one workspace for IMEI control and dispatch-ledger integrity. Two ledgers, one device truth.">
+<meta name="description" data-i18n-content="meta.description" content="AMAYA × NSpector — one workspace for IMEI control and dispatch-ledger integrity. Two ledgers, one device truth.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="AMAYA × NSpector">
-<meta property="og:title" content="AMAYA × NSpector — Unified Device Intelligence">
-<meta property="og:description" content="Two ledgers. One device truth. Cross-ledger IMEI dossiers, custody trails and movement evidence in a single workspace.">
+<meta property="og:title" data-i18n-content="app.title" content="AMAYA × NSpector — Unified Device Intelligence">
+<meta property="og:description" data-i18n-content="meta.description" content="Two ledgers. One device truth. Cross-ledger IMEI dossiers, custody trails and movement evidence in a single workspace.">
 <meta property="og:type" content="website">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%23ff7b81'/%3E%3Cstop offset='.55' stop-color='%23e4383f'/%3E%3Cstop offset='1' stop-color='%238d1b45'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial,sans-serif' font-size='36' font-weight='700' fill='%23fff'%3EN%3C/text%3E%3C/svg%3E">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ws: wss:; font-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>AMAYA × NSpector — Unified Device Intelligence</title>
+<title data-i18n="app.title">AMAYA × NSpector — Unified Device Intelligence</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="nspector.css">
 <link rel="stylesheet" href="shell.css">
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#main" data-i18n="skip.content">Skip to content</a>
 <div id="shell">
   <aside id="rail">
-    <button class="rail-brand" data-ws="overview" title="AMAYA × NSpector" aria-label="AMAYA × NSpector — go to overview">
+    <button class="rail-brand" data-ws="overview" data-i18n-title="app.name" data-i18n-aria="nav.goOverviewAria" title="AMAYA × NSpector" aria-label="AMAYA × NSpector — go to overview">
       <span class="brand-mark">N<span>S</span></span>
       <span class="brand-copy">
         <strong>AMAYA <i>×</i> NSpector</strong>
-        <small>Device integrity suite</small>
+        <small data-i18n="app.tagline">Device integrity suite</small>
       </span>
     </button>
 
-    <nav id="railnav" aria-label="Workspaces">
-      <button data-ws="overview" class="active" title="Overview" aria-label="Overview" aria-current="page">
+    <nav id="railnav" data-i18n-aria="nav.workspaces" aria-label="Workspaces">
+      <button data-ws="overview" class="active" data-i18n-title="nav.overview" data-i18n-aria="nav.overview" title="Overview" aria-label="Overview" aria-current="page">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
-        <span>Overview</span>
+        <span data-i18n="nav.overview">Overview</span>
       </button>
-      <button data-ws="lookup" title="Unified lookup" aria-label="Unified lookup">
+      <button data-ws="lookup" data-i18n-title="nav.lookup" data-i18n-aria="nav.lookup" title="Unified lookup" aria-label="Unified lookup">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 0 4.55 13.46l4.25 4.24 1.41-1.41-4.24-4.25A7.5 7.5 0 0 0 10.5 3Zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"/></svg>
-        <span>Unified lookup</span>
+        <span data-i18n="nav.lookup">Unified lookup</span>
       </button>
-      <button data-ws="devices" title="Device ledger" aria-label="Device ledger">
+      <button data-ws="devices" data-i18n-title="nav.devices" data-i18n-aria="nav.devices" title="Device ledger" aria-label="Device ledger">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3H4V4Zm0 5h16v3H4V9Zm0 5h10v3H4v-3Zm0 5h10v2H4v-2Zm12 0h4v2h-4v-2Z"/></svg>
-        <span>Device ledger</span>
+        <span data-i18n="nav.devices">Device ledger</span>
       </button>
-      <button data-ws="imei" title="IMEI Control Center" aria-label="IMEI Control Center">
+      <button data-ws="imei" data-i18n-title="nav.imei" data-i18n-aria="nav.imei" title="IMEI Control Center" aria-label="IMEI Control Center">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 2v16h10V4H7Zm4 14h2v1h-2v-1Z"/></svg>
-        <span>IMEI Control</span>
+        <span data-i18n="nav.imeiShort">IMEI Control</span>
       </button>
-      <button data-ws="sources" title="Data sources" aria-label="Data sources">
+      <button data-ws="sources" data-i18n-title="nav.sources" data-i18n-aria="nav.sources" title="Data sources" aria-label="Data sources">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c4.42 0 8 1.34 8 3v12c0 1.66-3.58 3-8 3s-8-1.34-8-3V6c0-1.66 3.58-3 8-3Zm0 2c-3.87 0-6 1.05-6 1.5S8.13 8 12 8s6-1.05 6-1.5S15.87 5 12 5Zm6 4.3c-1.4.82-3.64 1.2-6 1.2s-4.6-.38-6-1.2V12c0 .45 2.13 1.5 6 1.5s6-1.05 6-1.5V9.3Zm0 6c-1.4.82-3.64 1.2-6 1.2s-4.6-.38-6-1.2V18c0 .45 2.13 1.5 6 1.5s6-1.05 6-1.5v-2.7Z"/></svg>
-        <span>Data sources</span>
+        <span data-i18n="nav.sources">Data sources</span>
       </button>
     </nav>
 
     <div class="rail-foot">
       <div class="rail-live" role="status" aria-live="polite"><i></i><span id="syncstate">connecting…</span></div>
-      <button id="shortcuts-btn" class="rail-shortcuts" title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts">⌘<span>K</span> <em>search</em></button>
+      <button id="shortcuts-btn" class="rail-shortcuts" data-i18n-title="rail.shortcuts" data-i18n-aria="rail.shortcutsAria" title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts">⌘<span>K</span> <em data-i18n="rail.search">search</em></button>
       <div class="rail-version" id="rail-version">v1.0.0 · local engine</div>
     </div>
   </aside>
@@ -64,24 +64,32 @@
   <div id="stage">
     <header id="topbar">
       <div class="page-id">
-        <span id="ws-eyebrow">Unified fleet overview</span>
-        <h1 id="ws-title">Two ledgers. One device truth.</h1>
+        <span id="ws-eyebrow" data-i18n="nav.overview">Unified fleet overview</span>
+        <h1 id="ws-title" data-i18n="title.overview">Two ledgers. One device truth.</h1>
       </div>
 
       <form id="global-search" role="search" autocomplete="off">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 1 0 4.55 13.46l4.25 4.24 1.41-1.41-4.24-4.25A7.5 7.5 0 0 0 10.5 3Zm0 2a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"/></svg>
-        <input id="gs-q" type="text" placeholder="Search any IMEI or serial across both ledgers" spellcheck="false" autocomplete="off" aria-label="Search IMEI or serial across both ledgers" aria-autocomplete="list" aria-controls="gs-suggest" aria-expanded="false" role="combobox">
+        <input id="gs-q" type="text" data-i18n-placeholder="search.globalPlaceholder" placeholder="Search any IMEI or serial across both ledgers" spellcheck="false" autocomplete="off" data-i18n-aria="search.globalAria" aria-label="Search IMEI or serial across both ledgers" aria-autocomplete="list" aria-controls="gs-suggest" aria-expanded="false" role="combobox">
         <kbd class="search-kbd" aria-hidden="true">⌘K</kbd>
-        <button class="primary" type="submit">Inspect</button>
-        <div id="gs-suggest" class="suggest" role="listbox" aria-label="Search suggestions" hidden></div>
+        <button class="primary" type="submit" data-i18n="search.inspect">Inspect</button>
+        <div id="gs-suggest" class="suggest" role="listbox" data-i18n-aria="search.suggestions" aria-label="Search suggestions" hidden></div>
       </form>
 
       <div class="topright">
-        <div class="exposure" title="Value attached to open NSpector findings">
-          <span class="ex-label">Open exposure</span>
+        <div class="locale-picker" data-i18n-title="top.language" title="Language">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 2c1.2 0 2.3 2.3 2.8 5H9.2C9.7 7.3 10.8 5 12 5ZM5.1 10h3.6c-.2 1.4-.2 2.6 0 4H5.1a7 7 0 0 1 0-4Zm.9 6h3.2c.5 2.1 1.3 3.6 2.2 4.5A7 7 0 0 1 6 16Zm6 4.5c-.9-.9-1.7-2.4-2.2-4.5h4.4c-.5 2.1-1.3 3.6-2.2 4.5Zm3.1-6.5H15c.2-1.4.2-2.6 0-4h-3.9c.2 1.4.2 2.6 0 4Zm.8 6a7 7 0 0 1 2.1-4.5h-3.2c-.5 2.1-1.3 3.6-2.2 4.5A9 9 0 0 0 15 17.5ZM15.3 14a15 15 0 0 0 0-4h3.6a7 7 0 0 1 0 4h-3.6Z"/></svg>
+          <select id="locale-select" data-i18n-aria="top.language" aria-label="Language">
+            <option value="en" selected>English</option>
+            <option value="bn">বাংলা</option>
+            <option value="zh">简体中文</option>
+          </select>
+        </div>
+        <div class="exposure" data-i18n-title="top.exposureTitle" title="Value attached to open NSpector findings">
+          <span class="ex-label" data-i18n="top.exposure">Open exposure</span>
           <span class="ex-val" id="top-exposure-val">—</span>
         </div>
-        <button id="syncbtn" class="ghost" title="Re-ingest NSpector source data" aria-label="Sync — re-ingest NSpector source data"><span class="btn-label">Sync</span></button>
+        <button id="syncbtn" class="ghost" data-i18n-title="top.syncTitle" data-i18n-aria="top.syncAria" title="Re-ingest NSpector source data" aria-label="Sync — re-ingest NSpector source data"><span class="btn-label" data-i18n="top.sync">Sync</span></button>
       </div>
     </header>
 
@@ -90,16 +98,16 @@
       <section class="workspace ws-overview active" data-ws="overview">
         <div id="ov-hero" class="hero">
           <div class="hero-copy">
-            <span class="eyebrow">Merged workspace</span>
-            <h2>Two ledgers. <em>One device truth.</em></h2>
-            <p id="ov-lede">The NSpector dispatch ledger and the AMAYA IMEI Control Center now answer the same question together: where did this handset actually go?</p>
+            <span class="eyebrow" data-i18n="overview.eyebrow">Merged workspace</span>
+            <h2 data-i18n-html="overview.heroTitle">Two ledgers. <em>One device truth.</em></h2>
+            <p id="ov-lede" data-i18n="overview.ledeStatic">The NSpector dispatch ledger and the AMAYA IMEI Control Center now answer the same question together: where did this handset actually go?</p>
             <div class="hero-actions">
-              <button class="primary" data-goto="lookup">Open unified lookup</button>
-              <button data-goto="imei">Open IMEI Control</button>
+              <button class="primary" data-goto="lookup" data-i18n="overview.openLookup">Open unified lookup</button>
+              <button data-goto="imei" data-i18n="overview.openImei">Open IMEI Control</button>
             </div>
           </div>
           <div class="merge-orb" id="ov-orb" style="--p:0%">
-            <div class="merge-core"><b id="ov-match-pct">—</b><span>matched IMEIs</span></div>
+            <div class="merge-core"><b id="ov-match-pct">—</b><span data-i18n="overview.matchedImeis">matched IMEIs</span></div>
           </div>
         </div>
 
@@ -111,30 +119,30 @@
 
         <div class="ov-grid">
           <div class="panel glass" id="ov-recon">
-            <h3>Ledger reconciliation</h3>
-            <p class="hint">Exact IMEI matches between the NSpector dispatch trail and the AMAYA asset ledger.</p>
-            <div id="ov-recon-body"><p class="hint">Loading reconciliation…</p></div>
+            <h3 data-i18n="ov.recon.title">Ledger reconciliation</h3>
+            <p class="hint" data-i18n="ov.recon.hint">Exact IMEI matches between the NSpector dispatch trail and the AMAYA asset ledger.</p>
+            <div id="ov-recon-body"><p class="hint" data-i18n="ov.recon.loading">Loading reconciliation…</p></div>
           </div>
           <div class="panel glass" id="ov-amaya">
-            <h3>IMEI Control Center</h3>
-            <p class="hint">Movement evidence across four source workbooks.</p>
-            <div id="ov-amaya-body"><p class="hint">Loading snapshot…</p></div>
+            <h3 data-i18n="ov.amaya.title">IMEI Control Center</h3>
+            <p class="hint" data-i18n="ov.amaya.hint">Movement evidence across four source workbooks.</p>
+            <div id="ov-amaya-body"><p class="hint" data-i18n="ov.amaya.loading">Loading snapshot…</p></div>
           </div>
           <div class="panel glass" id="ov-ns">
-            <h3>NSpector ledger</h3>
-            <p class="hint">Dispatch, returns, dealer custody and exposure.</p>
-            <div id="ov-ns-body"><p class="hint">Loading ledger…</p></div>
+            <h3 data-i18n="ov.ns.title">NSpector ledger</h3>
+            <p class="hint" data-i18n="ov.ns.hint">Dispatch, returns, dealer custody and exposure.</p>
+            <div id="ov-ns-body"><p class="hint" data-i18n="ov.ns.loading">Loading ledger…</p></div>
           </div>
           <div class="panel glass" id="ov-critical">
-            <h3>Highest-priority findings</h3>
-            <p class="hint">Open or investigating findings from the NSpector reasoning engine.</p>
-            <div id="ov-critical-body"><p class="hint">Loading findings…</p></div>
+            <h3 data-i18n="ov.critical.title">Highest-priority findings</h3>
+            <p class="hint" data-i18n="ov.critical.hint">Open or investigating findings from the NSpector reasoning engine.</p>
+            <div id="ov-critical-body"><p class="hint" data-i18n="ov.critical.loading">Loading findings…</p></div>
           </div>
         </div>
 
         <div class="panel glass" id="ov-sources">
-          <h3>Evidence base</h3>
-          <p class="hint">Every number in this app comes from a local file. Nothing is fetched at runtime.</p>
+          <h3 data-i18n="ov.sources.title">Evidence base</h3>
+          <p class="hint" data-i18n="ov.sources.hint">Every number in this app comes from a local file. Nothing is fetched at runtime.</p>
           <div id="ov-sources-body" class="source-grid"></div>
         </div>
       </section>
@@ -142,18 +150,18 @@
       <!-- ================= UNIFIED LOOKUP ================= -->
       <section class="workspace ws-lookup" data-ws="lookup">
         <div class="lookup-hero">
-          <span class="eyebrow">Cross-ledger lookup</span>
-          <h2>One serial. <em>Both evidence trails.</em></h2>
-          <p>Search by IMEI or serial. NSpector contributes custody, returns and reasoning; AMAYA contributes every workbook occurrence, lifecycle state and source citation.</p>
+          <span class="eyebrow" data-i18n="lookup.eyebrow">Cross-ledger lookup</span>
+          <h2 data-i18n-html="lookup.heroTitle">One serial. <em>Both evidence trails.</em></h2>
+          <p data-i18n="lookup.intro">Search by IMEI or serial. NSpector contributes custody, returns and reasoning; AMAYA contributes every workbook occurrence, lifecycle state and source citation.</p>
           <form id="lookup-form" class="lookup-form" autocomplete="off">
             <div class="lookup-field">
-              <input id="lookup-q" type="text" placeholder="864616088906357" inputmode="numeric" spellcheck="false" autocomplete="off" aria-label="IMEI or serial to inspect" aria-autocomplete="list" aria-controls="lk-suggest" aria-expanded="false" role="combobox">
-              <div id="lk-suggest" class="suggest" role="listbox" aria-label="Serial suggestions" hidden></div>
+              <input id="lookup-q" type="text" placeholder="864616088906357" inputmode="numeric" spellcheck="false" autocomplete="off" data-i18n-aria="lookup.aria" aria-label="IMEI or serial to inspect" aria-autocomplete="list" aria-controls="lk-suggest" aria-expanded="false" role="combobox">
+              <div id="lk-suggest" class="suggest" role="listbox" data-i18n-aria="search.suggestions" aria-label="Search suggestions" hidden></div>
             </div>
-            <button class="primary" type="submit">Open dossier</button>
+            <button class="primary" type="submit" data-i18n="lookup.open">Open dossier</button>
           </form>
           <div class="quicktry" id="lookup-try">
-            <span>Try a known overlap:</span>
+            <span data-i18n="lookup.try">Try a known overlap:</span>
             <button class="chipbtn" data-s="864616088906357">864616088906357</button>
             <button class="chipbtn" data-s="868436082481166">868436082481166</button>
             <button class="chipbtn" data-s="359764211948607">359764211948607</button>
@@ -162,8 +170,8 @@
         <div id="lookup-out">
           <div class="panel glass empty-dossier">
             <div class="empty-glyph">⌘</div>
-            <h3>Nothing opened yet</h3>
-            <p class="hint">Enter a serial above, or pick one of the overlap examples. The dossier will show which ledgers hold the device and what each one says.</p>
+            <h3 data-i18n="lookup.emptyTitle">Nothing opened yet</h3>
+            <p class="hint" data-i18n="lookup.emptyHint">Enter a serial above, or pick one of the overlap examples. The dossier will show which ledgers hold the device and what each one says.</p>
           </div>
         </div>
       </section>
@@ -172,50 +180,50 @@
       <section class="workspace ws-devices" data-ws="devices">
         <div class="ws-head">
           <div>
-            <span class="eyebrow">NSpector workspace</span>
-            <h2>Device ledger & reasoning</h2>
+            <span class="eyebrow" data-i18n="devices.eyebrow">NSpector workspace</span>
+            <h2 data-i18n="devices.title">Device ledger & reasoning</h2>
           </div>
-          <span class="source-pill">NSpector CSV ledgers</span>
+          <span class="source-pill" data-i18n="devices.pill">NSpector CSV ledgers</span>
         </div>
 
-        <nav id="tabs" role="tablist" aria-label="NSpector views">
-          <button data-tab="queue" class="active" role="tab" aria-selected="true" aria-controls="queue" id="tab-queue">Work Queue</button>
-          <button data-tab="inspect" role="tab" aria-selected="false" aria-controls="inspect" id="tab-inspect">Inspector</button>
-          <button data-tab="exposure" role="tab" aria-selected="false" aria-controls="exposure" id="tab-exposure">Exposure</button>
-          <button data-tab="chains" role="tab" aria-selected="false" aria-controls="chains" id="tab-chains">Flows</button>
-          <button data-tab="dealers" role="tab" aria-selected="false" aria-controls="dealers" id="tab-dealers">Dealers</button>
-          <button data-tab="ownership" role="tab" aria-selected="false" aria-controls="ownership" id="tab-ownership">Ownership</button>
+        <nav id="tabs" role="tablist" data-i18n-aria="tabs.aria" aria-label="NSpector views">
+          <button data-tab="queue" class="active" role="tab" aria-selected="true" aria-controls="queue" id="tab-queue" data-i18n="tabs.queue">Work Queue</button>
+          <button data-tab="inspect" role="tab" aria-selected="false" aria-controls="inspect" id="tab-inspect" data-i18n="tabs.inspect">Inspector</button>
+          <button data-tab="exposure" role="tab" aria-selected="false" aria-controls="exposure" id="tab-exposure" data-i18n="tabs.exposure">Exposure</button>
+          <button data-tab="chains" role="tab" aria-selected="false" aria-controls="chains" id="tab-chains" data-i18n="tabs.chains">Flows</button>
+          <button data-tab="dealers" role="tab" aria-selected="false" aria-controls="dealers" id="tab-dealers" data-i18n="tabs.dealers">Dealers</button>
+          <button data-tab="ownership" role="tab" aria-selected="false" aria-controls="ownership" id="tab-ownership" data-i18n="tabs.ownership">Ownership</button>
         </nav>
 
         <section id="queue" class="view active" role="tabpanel" aria-labelledby="tab-queue">
           <div class="filters">
             <select id="fq-status">
-              <option value="">Any status</option>
-              <option value="open">Open</option>
-              <option value="investigating">Investigating</option>
-              <option value="resolved">Resolved</option>
-              <option value="dismissed">Dismissed</option>
+              <option value="" data-i18n="queue.anyStatus">Any status</option>
+              <option value="open" data-i18n="option.status.open">Open</option>
+              <option value="investigating" data-i18n="option.status.investigating">Investigating</option>
+              <option value="resolved" data-i18n="option.status.resolved">Resolved</option>
+              <option value="dismissed" data-i18n="option.status.dismissed">Dismissed</option>
             </select>
             <select id="fq-sev">
-              <option value="">Any severity</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="" data-i18n="queue.anySeverity">Any severity</option>
+              <option value="critical" data-i18n="option.severity.critical">Critical</option>
+              <option value="high" data-i18n="option.severity.high">High</option>
+              <option value="medium" data-i18n="option.severity.medium">Medium</option>
+              <option value="low" data-i18n="option.severity.low">Low</option>
             </select>
             <select id="fq-kind">
-              <option value="">Any finding</option>
-              <option value="duplicate_cross">Duplicate — two dealers</option>
-              <option value="duplicate_multi">Duplicate — three or more</option>
-              <option value="orphan_return">Returned, never dispatched</option>
-              <option value="imei_lock">IMEI lock or mismatch</option>
-              <option value="no_serial_return">Return with no serial</option>
-              <option value="luhn_invalid">Fails check digit</option>
-              <option value="tac_conflict">Prefix / model conflict</option>
+              <option value="" data-i18n="queue.anyFinding">Any finding</option>
+              <option value="duplicate_cross" data-i18n="option.kind.duplicate_cross">Duplicate — two dealers</option>
+              <option value="duplicate_multi" data-i18n="option.kind.duplicate_multi">Duplicate — three or more</option>
+              <option value="orphan_return" data-i18n="option.kind.orphan_return">Returned, never dispatched</option>
+              <option value="imei_lock" data-i18n="option.kind.imei_lock">IMEI lock or mismatch</option>
+              <option value="no_serial_return" data-i18n="option.kind.no_serial_return">Return with no serial</option>
+              <option value="luhn_invalid" data-i18n="option.kind.luhn_invalid">Fails check digit</option>
+              <option value="tac_conflict" data-i18n="option.kind.tac_conflict">Prefix / model conflict</option>
             </select>
-            <input id="fq-owner" type="text" placeholder="Filter by owner" aria-label="Filter findings by owner" autocomplete="off">
-            <input id="fq-min" type="number" placeholder="Min value" min="0" step="5000" aria-label="Minimum observed value" autocomplete="off">
-            <button id="fq-clear" class="ghost">Clear</button>
+            <input id="fq-owner" type="text" data-i18n-placeholder="queue.ownerPlaceholder" data-i18n-aria="queue.ownerAria" placeholder="Filter by owner" aria-label="Filter findings by owner" autocomplete="off">
+            <input id="fq-min" type="number" data-i18n-placeholder="queue.minPlaceholder" data-i18n-aria="queue.minAria" placeholder="Min value" min="0" step="5000" aria-label="Minimum observed value" autocomplete="off">
+            <button id="fq-clear" class="ghost" data-i18n="queue.clear">Clear</button>
           </div>
           <div id="queue-stats" class="statbar"></div>
           <div id="queue-list" class="cards"></div>
@@ -224,17 +232,17 @@
 
         <section id="inspect" class="view" role="tabpanel" aria-labelledby="tab-inspect">
           <div class="panel">
-            <h3>Serial inspector</h3>
-            <p class="hint">Enter a 15-digit IMEI or any serial to get its full trail, the reasoning behind any finding, and the evidence behind it.</p>
+            <h3 data-i18n="inspect.title">Serial inspector</h3>
+            <p class="hint" data-i18n="inspect.hint">Enter a 15-digit IMEI or any serial to get its full trail, the reasoning behind any finding, and the evidence behind it.</p>
             <div class="searchbar">
-              <input id="ins-q" type="text" placeholder="864616088906357" aria-label="IMEI or serial to inspect" autocomplete="off" spellcheck="false">
-              <button id="ins-go" class="primary">Inspect</button>
+              <input id="ins-q" type="text" placeholder="864616088906357" data-i18n-aria="lookup.aria" aria-label="IMEI or serial to inspect" autocomplete="off" spellcheck="false">
+              <button id="ins-go" class="primary" data-i18n="search.inspect">Inspect</button>
             </div>
             <div class="quicktry">
-              <span>Try:</span>
-              <button class="chipbtn" data-s="864616088906357">a duplicate</button>
-              <button class="chipbtn" data-s="868436082481166">an IMEI lock</button>
-              <button class="chipbtn" data-s="359764211948607">three dealers</button>
+              <span data-i18n="inspect.try">Try:</span>
+              <button class="chipbtn" data-s="864616088906357" data-i18n="inspect.duplicate">a duplicate</button>
+              <button class="chipbtn" data-s="868436082481166" data-i18n="inspect.lock">an IMEI lock</button>
+              <button class="chipbtn" data-s="359764211948607" data-i18n="inspect.threeDealers">three dealers</button>
             </div>
           </div>
           <div id="ins-out"></div>
@@ -243,37 +251,37 @@
         <section id="exposure" class="view" role="tabpanel" aria-labelledby="tab-exposure">
           <div id="exp-cards" class="grid"></div>
           <div class="panel">
-            <h3>Where the exposure sits</h3>
-            <p class="hint">Value is taken from prices actually observed on your own return records — nothing here is an estimate.</p>
+            <h3 data-i18n="exposure.whereTitle">Where the exposure sits</h3>
+            <p class="hint" data-i18n="exposure.whereHint">Value is taken from prices actually observed on your own return records — nothing here is an estimate.</p>
             <div id="exp-sev" class="chart"></div>
           </div>
           <div class="panel">
-            <h3>Root cause — diagnosed</h3>
-            <p class="hint">What the evidence actually points to, across every finding.</p>
+            <h3 data-i18n="exposure.rootTitle">Root cause — diagnosed</h3>
+            <p class="hint" data-i18n="exposure.rootHint">What the evidence actually points to, across every finding.</p>
             <div id="exp-diag" class="chart"></div>
           </div>
           <div class="panel">
-            <h3>Highest value items</h3>
+            <h3 data-i18n="exposure.topTitle">Highest value items</h3>
             <div id="exp-top" class="cards"></div>
           </div>
           <div class="panel">
-            <h3>Price book</h3>
-            <p class="hint">Built from your logged returns. Families with no observed price are shown as unpriced rather than assumed to be zero.</p>
+            <h3 data-i18n="exposure.priceTitle">Price book</h3>
+            <p class="hint" data-i18n="exposure.priceHint">Built from your logged returns. Families with no observed price are shown as unpriced rather than assumed to be zero.</p>
             <div id="exp-book" class="chart"></div>
           </div>
         </section>
 
         <section id="chains" class="view" role="tabpanel" aria-labelledby="tab-chains">
           <div class="panel">
-            <h3>Repeated dealer-to-dealer flows</h3>
-            <p class="hint">The same serials passing through the same pair of dealers, over and over. That is not random noise — treat each of these as one structural issue, not N separate duplicates.</p>
+            <h3 data-i18n="chains.title">Repeated dealer-to-dealer flows</h3>
+            <p class="hint" data-i18n="chains.hint">The same serials passing through the same pair of dealers, over and over. That is not random noise — treat each of these as one structural issue, not N separate duplicates.</p>
             <div id="chain-list" class="cards"></div>
           </div>
         </section>
 
         <section id="dealers" class="view" role="tabpanel" aria-labelledby="tab-dealers">
           <div class="filters">
-            <input id="dl-search" type="text" placeholder="Search dealer name or alias" aria-label="Search dealer name or alias" autocomplete="off">
+            <input id="dl-search" type="text" data-i18n-placeholder="dealers.searchPlaceholder" data-i18n-aria="dealers.searchAria" placeholder="Search dealer name or alias" aria-label="Search dealer name or alias" autocomplete="off">
           </div>
           <div id="dealer-list" class="cards"></div>
         </section>
@@ -281,17 +289,17 @@
         <section id="ownership" class="view" role="tabpanel" aria-labelledby="tab-ownership">
           <div id="own-cards" class="grid"></div>
           <div class="panel">
-            <h3>Finding types</h3>
+            <h3 data-i18n="ownership.findingTypes">Finding types</h3>
             <div id="own-kinds" class="chart"></div>
           </div>
           <div class="panel">
-            <h3>How this is meant to be used</h3>
-            <p class="hint">Each finding is a reporting item, not an accusation. A duplicate is almost always an unclosed return, not theft. What matters is that somebody is accountable for closing it.</p>
+            <h3 data-i18n="ownership.usageTitle">How this is meant to be used</h3>
+            <p class="hint" data-i18n="ownership.usageHint">Each finding is a reporting item, not an accusation. A duplicate is almost always an unclosed return, not theft. What matters is that somebody is accountable for closing it.</p>
             <ul class="steps">
-              <li><b>Open</b> — generated, nobody has looked at it</li>
-              <li><b>Investigating</b> — someone is checking it against the physical unit</li>
-              <li><b>Resolved</b> — action taken, note recorded against the finding</li>
-              <li><b>Dismissed</b> — checked and explained, no action needed</li>
+              <li><b data-i18n="option.status.open">Open</b> — <span data-i18n="ownership.openDesc">generated, nobody has looked at it</span></li>
+              <li><b data-i18n="option.status.investigating">Investigating</b> — <span data-i18n="ownership.investigatingDesc">someone is checking it against the physical unit</span></li>
+              <li><b data-i18n="option.status.resolved">Resolved</b> — <span data-i18n="ownership.resolvedDesc">action taken, note recorded against the finding</span></li>
+              <li><b data-i18n="option.status.dismissed">Dismissed</b> — <span data-i18n="ownership.dismissedDesc">checked and explained, no action needed</span></li>
             </ul>
           </div>
         </section>
@@ -301,28 +309,28 @@
       <section class="workspace ws-imei" data-ws="imei">
         <div class="ws-head">
           <div>
-            <span class="eyebrow">AMAYA workspace</span>
-            <h2>IMEI Control Center</h2>
+            <span class="eyebrow" data-i18n="imei.eyebrow">AMAYA workspace</span>
+            <h2 data-i18n="nav.imei">IMEI Control Center</h2>
           </div>
             <div class="frame-actions">
-            <span class="frame-note" id="frame-note">Loading snapshot…</span>
-            <button id="frame-reload" class="ghost" title="Refresh snapshot data" aria-label="Refresh snapshot data">Reload</button>
-            <button class="ghost open-ama" title="Open the full IMEI Control Center" aria-label="Open the full IMEI Control Center">Open <span aria-hidden="true">→</span></button>
+            <span class="frame-note" id="frame-note" data-i18n="ov.amaya.loading">Loading snapshot…</span>
+            <button id="frame-reload" class="ghost" data-i18n-title="imei.reloadTitle" data-i18n-aria="imei.reloadTitle" title="Refresh snapshot data" aria-label="Refresh snapshot data"><span data-i18n="imei.reload">Reload</span></button>
+            <button class="ghost open-ama" data-i18n-title="imei.openFullTitle" data-i18n-aria="imei.openFullTitle" title="Open the full IMEI Control Center" aria-label="Open the full IMEI Control Center"><span data-i18n="imei.open">Open</span> <span aria-hidden="true">→</span></button>
           </div>
         </div>
-        <div class="kpi-grid" id="ama-stats" aria-label="AMAYA key metrics">
+        <div class="kpi-grid" id="ama-stats" data-i18n-aria="imei.assetsAria" aria-label="AMAYA key metrics">
           <div class="stat-card skeleton"></div><div class="stat-card skeleton"></div>
           <div class="stat-card skeleton"></div><div class="stat-card skeleton"></div>
         </div>
-        <div class="review-summary" id="ama-review">Loading review summary…</div>
-        <div class="section-header">LATEST RESOLVED STATE</div>
-        <div class="kpi-grid" id="ama-states" aria-label="Latest resolved states"></div>
+        <div class="review-summary" id="ama-review" data-i18n="imei.reviewLoading">Loading review summary…</div>
+        <div class="section-header" data-i18n="imei.stateHeader">LATEST RESOLVED STATE</div>
+        <div class="kpi-grid" id="ama-states" data-i18n-aria="imei.statesAria" aria-label="Latest resolved states"></div>
         <div class="ama-cta">
           <div>
-            <div class="section-header">One device. One defensible story.</div>
-            <p>Turn repeated IMEI appearances into a traceable movement record — and make every unresolved conflict visible before it becomes a reporting error.</p>
+            <div class="section-header" data-i18n="imei.ctaHeader">One device. One defensible story.</div>
+            <p data-i18n="imei.ctaBody">Turn repeated IMEI appearances into a traceable movement record — and make every unresolved conflict visible before it becomes a reporting error.</p>
           </div>
-          <button class="primary open-ama">Open full Control Center <span aria-hidden="true">→</span></button>
+          <button class="primary open-ama"><span data-i18n="imei.ctaButton">Open full Control Center</span> <span aria-hidden="true">→</span></button>
         </div>
         <p class="ama-snapshot-note" id="ama-snapshot-note"></p>
       </section>
@@ -331,12 +339,12 @@
       <section class="workspace ws-sources" data-ws="sources">
         <div class="ws-head">
           <div>
-            <span class="eyebrow">Provenance</span>
-            <h2>Data sources & methodology</h2>
+            <span class="eyebrow" data-i18n="sources.eyebrow">Provenance</span>
+            <h2 data-i18n="sources.title">Data sources &amp; methodology</h2>
           </div>
           <span class="source-pill" id="src-data-version">AMAYA snapshot</span>
         </div>
-        <div id="sources-out"><div class="panel glass"><p class="hint">Loading source inventory…</p></div></div>
+        <div id="sources-out"><div class="panel glass"><p class="hint" data-i18n="sources.loading">Loading source inventory…</p></div></div>
       </section>
     </main>
   </div>
@@ -346,8 +354,8 @@
 <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title" aria-hidden="true">
   <div class="sheet-inner">
     <div class="sheet-head">
-      <h2 id="sh-title">Finding</h2>
-      <button id="sh-close" class="ghost" aria-label="Close finding sheet">Close</button>
+      <h2 id="sh-title" data-i18n="sheet.title">Finding</h2>
+      <button id="sh-close" class="ghost" data-i18n-aria="sheet.closeAria" aria-label="Close finding sheet"><span data-i18n="sheet.close">Close</span></button>
     </div>
     <div id="sh-body" class="sheet-body"></div>
   </div>
@@ -357,21 +365,22 @@
 
 <dialog id="shortcuts" class="shortcuts" aria-labelledby="shortcuts-title">
   <div class="shortcuts-head">
-    <h2 id="shortcuts-title">Keyboard shortcuts</h2>
-    <button id="shortcuts-close" class="ghost" aria-label="Close shortcuts">Close</button>
+    <h2 id="shortcuts-title" data-i18n="shortcuts.title">Keyboard shortcuts</h2>
+    <button id="shortcuts-close" class="ghost" data-i18n-aria="shortcuts.closeAria" aria-label="Close shortcuts"><span data-i18n="shortcuts.close">Close</span></button>
   </div>
   <div class="shortcuts-list">
-    <div><kbd>⌘</kbd><kbd>K</kbd><span>Focus global search</span></div>
-    <div><kbd>/</kbd><span>Focus search anywhere</span></div>
-    <div><kbd>1</kbd>–<kbd>5</kbd><span>Switch workspace</span></div>
-    <div><kbd>↑</kbd><kbd>↓</kbd><span>Move through suggestions</span></div>
-    <div><kbd>Enter</kbd><span>Open highlighted result</span></div>
-    <div><kbd>?</kbd><span>Show this help</span></div>
-    <div><kbd>Esc</kbd><span>Close panel or clear search</span></div>
+    <div><kbd>⌘</kbd><kbd>K</kbd><span data-i18n="shortcuts.focusGlobal">Focus global search</span></div>
+    <div><kbd>/</kbd><span data-i18n="shortcuts.focusAnywhere">Focus search anywhere</span></div>
+    <div><kbd>1</kbd>–<kbd>5</kbd><span data-i18n="shortcuts.switchWorkspace">Switch workspace</span></div>
+    <div><kbd>↑</kbd><kbd>↓</kbd><span data-i18n="shortcuts.moveSuggestions">Move through suggestions</span></div>
+    <div><kbd>Enter</kbd><span data-i18n="shortcuts.openHighlighted">Open highlighted result</span></div>
+    <div><kbd>?</kbd><span data-i18n="shortcuts.showHelp">Show this help</span></div>
+    <div><kbd>Esc</kbd><span data-i18n="shortcuts.closePanel">Close panel or clear search</span></div>
   </div>
-  <p class="shortcuts-foot">Built for keyboard-first investigation.</p>
+  <p class="shortcuts-foot" data-i18n="shortcuts.foot">Built for keyboard-first investigation.</p>
 </dialog>
 
+<script src="i18n.js"></script>
 <script src="nspector.js"></script>
 <script src="shell.js"></script>
 </body>
