@@ -26,13 +26,25 @@ const isReadOnly = process.env.RENDER === 'true' || process.env.RENDER_SERVICE_I
 const DBFILE = process.env.NSPECTOR_DB || (isReadOnly ? '/tmp/nspector.db' : path.join(ROOT, 'nspector.db'));
 const AMAYA_DIR = process.env.AMAYA_DIR || path.join(ROOT, 'vendor', 'amaya');
 
-const db = dbm.open(DBFILE);
+let db;
+try {
+  db = dbm.open(DBFILE);
+  console.log('[combo] database opened:', DBFILE);
+} catch (e) {
+  console.error('[combo] failed to open database:', e.message);
+  process.exit(1);
+}
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 // ---------- amaya control center (read-only) ----------
-amaya.load(AMAYA_DIR);
+try {
+  amaya.load(AMAYA_DIR);
+  console.log('[combo] AMAYA loaded:', AMAYA_DIR, amaya.stats().ready);
+} catch (e) {
+  console.error('[combo] AMAYA load failed:', e.message);
+}
 app.use('/amaya-imei-control-center', express.static(AMAYA_DIR, {
   index: 'index.html',
   extensions: ['html'],
@@ -526,12 +538,23 @@ app.get('/api/combo/sources', (req, res) => {
 });
 
 // first run
-if (!dbm.stats(db).dispatches) {
-  console.log('[combo] first run — ingesting from', DATA);
-  const r = sync.runSync(db, DATA, null);
-  if (r.ok) console.log('[combo] loaded', r.stats.dispatches, 'dispatch records,', r.findings, 'findings');
-  else console.log('[combo] initial ingest failed:', r.error, '— drop CSVs into', DATA);
+try {
+  if (!dbm.stats(db).dispatches) {
+    console.log('[combo] first run — ingesting from', DATA);
+    const r = sync.runSync(db, DATA, null);
+    if (r.ok) console.log('[combo] loaded', r.stats.dispatches, 'dispatch records,', r.findings, 'findings');
+    else console.log('[combo] initial ingest failed:', r.error, '— drop CSVs into', DATA);
+  }
+} catch (e) {
+  console.error('[combo] first-run ingest error:', e.message, e.stack);
 }
+
+process.on('uncaughtException', (e) => {
+  console.error('[combo] uncaught exception:', e.message, e.stack);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[combo] unhandled rejection:', reason);
+});
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n  AMAYA × NSpector running`);
