@@ -6,6 +6,11 @@
  *   /amaya-imei-control-center the AMAYA IMEI Control Center PWA, unchanged
  *   /api/*                     NSpector ledger API + merged cross-ledger API
  */
+console.log('[combo] starting server...');
+console.log('[combo] NODE_ENV:', process.env.NODE_ENV);
+console.log('[combo] PORT:', process.env.PORT);
+console.log('[combo] CWD:', process.cwd());
+console.log('[combo] __dirname:', __dirname);
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
