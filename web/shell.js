@@ -41,7 +41,7 @@
   const desktop = !!(window.amayaShell && window.amayaShell.isDesktop);
 
   async function api(p, o) {
-    const r = await fetch(p, o);
+    const r = await fetch((window.SUITE_API_BASE || '') + p, o);
     if (!r.ok) {
       let detail = '';
       try { const j = await r.json(); if (j.error) detail = ' · ' + j.error; } catch (e) {}
@@ -676,6 +676,12 @@
     options = options || {};
     const hash = evidenceHash(options.serial);
     const silent = !!options.silent;
+    if (window.SUITE_NATIVE) {
+      // On Android the Control Center is a first-class in-app screen, not a popup.
+      try { sessionStorage.setItem('suite.control.opened', '1'); } catch (e) {}
+      window.location.assign(AMA_PATH + hash);
+      return;
+    }
     if (desktop && window.amayaShell.openControlCenter) {
       Promise.resolve(window.amayaShell.openControlCenter(hash))
         .then(ok => { if (!silent) toast(ok ? t('control.window') : t('control.failed'), ok ? 'success' : 'error'); })

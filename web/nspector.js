@@ -1,7 +1,7 @@
 /* NSpector client — one UI, served to desktop and phone from the same server. */
 (function () {
   'use strict';
-  const API = location.origin;
+  const API = window.SUITE_API_BASE || location.origin;
   let ws = null, retry = 0;
   let queueLimit = 40, queueOffset = 0;
 
@@ -47,7 +47,7 @@
   // ------------------------------------------------ live connection
   function connect(){
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    try { ws = new WebSocket(`${proto}://${location.host}/ws`); } catch(e){ return retryConnect(); }
+    try { ws = new WebSocket(window.SUITE_WS_URL || `${proto}://${location.host}/ws`); } catch(e){ return retryConnect(); }
     ws.onopen = () => { retry = 0; syncState('live',t('nsp.liveSync')); };
     ws.onclose = () => { syncState('off',t('nsp.reconnecting')); retryConnect(); };
     ws.onerror = () => { try { ws.close(); } catch(e){} };

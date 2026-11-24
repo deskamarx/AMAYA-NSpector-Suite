@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732" width="2732" height="2732">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1321"/>
+      <stop offset="1" stop-color="#05070f"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#8d1b45"/>
+      <stop offset=".52" stop-color="#e4383f"/>
+      <stop offset="1" stop-color="#ff9a83"/>
+    </linearGradient>
+  </defs>
+  <rect width="2732" height="2732" fill="url(#bg)"/>
+  <g transform="translate(966 966) scale(.78)">
+    <rect width="1024" height="1024" rx="224" fill="#0b1321"/>
+    <rect x="58" y="58" width="908" height="908" rx="184" fill="none" stroke="url(#mark)" stroke-width="18"/>
+    <path d="M310 744V280h138l228 288V280h138v464H676L448 456v288H310z" fill="url(#mark)"/>
+    <path d="M676 744 838 280" stroke="#fff" stroke-width="22" stroke-linecap="round" opacity=".92"/>
+  </g>
+  <text x="1366" y="1960" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="88" font-weight="700" letter-spacing="6" fill="#f4f6fb">AMAYA × NSPECTOR</text>
+  <text x="1366" y="2076" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="42" letter-spacing="3" fill="#8e9bb4">ONE DEVICE TRUTH</text>
+</svg>

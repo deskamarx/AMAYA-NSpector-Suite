@@ -10,12 +10,29 @@
   "scripts": {
     "start": "electron .",
     "pack": "node scripts/build.js",
+    "android:stage": "node scripts/stage-android.js",
+    "android:sync": "npm run android:stage && npx cap sync android",
+    "android:apk": "npm run android:sync && node scripts/android-gradle.js apk",
+    "android:aab": "npm run android:sync && node scripts/android-gradle.js aab",
+    "android:build": "npm run android:sync && node scripts/android-gradle.js all",
     "check": "node scripts/check.js"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/share": "^8.0.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
     "better-sqlite3": "^12.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.2"
   }
 }

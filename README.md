@@ -31,6 +31,28 @@ The window opens `http://localhost:4173`. Override the port with the `PORT`
 environment variable. The same server can be opened from another machine on
 the LAN at `http://<this-pc>:4173`.
 
+## Android
+
+A signed native Android build is generated with Capacitor. It bundles the full
+shell and the AMAYA IMEI Control Center locally, adds native splash/status-bar/
+back handling, and connects to the hosted API for live NSpector ledgers.
+
+```powershell
+npm run android:build     # APK + AAB into dist\Android
+```
+
+Outputs:
+
+- `dist\Android\AMAYA-NSpector-v1.0.0-release.apk` — signed APK for direct install.
+- `dist\Android\AMAYA-NSpector-v1.0.0-release.aab` — signed Android App Bundle for Google Play.
+- `dist\Android\SHA256SUMS.txt` — release checksums.
+
+Install the APK with `adb install -r dist\Android\AMAYA-NSpector-v1.0.0-release.apk`.
+The app needs an internet connection for live data; the desktop build remains
+the fully offline option. The signing keystore is generated locally at
+`android\app\release.jks` and is intentionally gitignored — keep it safe to
+preserve the app's update signing identity.
+
 ## Data
 
 - NSpector source CSV/TXT exports ship in `resources\data` inside the build and
@@ -69,7 +91,10 @@ web/                    merged shell (index.html, shell.css, shell.js)
 web/nspector.js         NSpector client, scoped for the merged shell
 vendor/amaya/           AMAYA PWA snapshot
 scripts/build.js        assembles dist\AMAYA-NSpector
+scripts/stage-android.js stages the Capacitor web bundle
+scripts/collect-android.js publishes signed APK/AAB artifacts
 scripts/check.js        static sanity checks
+android/                native Capacitor Android project
 ```
 
 ## Build notes

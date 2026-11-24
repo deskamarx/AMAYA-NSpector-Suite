@@ -8,8 +8,10 @@ const files = [
   'electron/main.js', 'electron/preload.js', 'electron/amaya-preload.js',
   'server/amaya.js', 'server/server.js', 'server/db.js', 'server/core.js',
   'server/reason.js', 'server/sync.js',
-  'web/i18n.js', 'web/nspector.js', 'web/shell.js',
-  'vendor/amaya/assets/suite-locale-bridge.js', 'scripts/build.js'
+  'web/i18n.js', 'web/nspector.js', 'web/shell.js', 'web/android-native.js',
+  'vendor/amaya/assets/suite-locale-bridge.js', 'scripts/build.js',
+  'scripts/stage-android.js', 'scripts/android-gradle.js',
+  'scripts/collect-android.js'
 ];
 let bad = 0;
 for (const f of files) {
@@ -24,6 +26,7 @@ for (const f of files) {
 
 const must = [
   'web/index.html', 'web/shell.css', 'web/nspector.css', 'web/fonts/fonts.css',
+  'capacitor.config.json',
   'vendor/amaya/index.html', 'vendor/amaya/assets/suite-locale-bridge.js',
   'vendor/amaya/data/assets.json',
   'vendor/amaya/data/events.json', 'vendor/amaya/data/meta.json',

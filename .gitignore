@@ -23,3 +23,16 @@ debug.log
 *.exe
 *.dll
 *.pak
+
+# Android generated output and signing secrets
+android-web/
+android/.gradle/
+android/build/
+android/app/build/
+android/app/src/main/assets/public/
+android/local.properties
+android/keystore.properties
+android/app/release.jks
+assets/icon.png
+assets/splash.png
+icons/
