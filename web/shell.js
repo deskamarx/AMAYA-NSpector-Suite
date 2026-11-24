@@ -87,6 +87,7 @@
     if (name === 'devices' && window.NSpectorUI) window.NSpectorUI.refreshAll();
     if (name === 'imei') renderAmaWorkspace();
     if (name === 'sources') loadSources();
+    scheduleTipAlign();
   }
 
   window.addEventListener('popstate', () => {
@@ -260,6 +261,42 @@
   $('#shortcuts-btn').addEventListener('click', openShortcuts);
   $('#shortcuts-close').addEventListener('click', closeShortcuts);
   $('#shortcuts').addEventListener('click', e => { if (e.target.id === 'shortcuts') closeShortcuts(); });
+
+  // ---------------------------------------------------------------- tooltips
+  // Keep edge tooltips inside the viewport. The ::after box is measured from
+  // computed style and flipped inward on hover/focus before it is painted, so
+  // a centred tooltip near the edge never creates page-level overflow.
+  function alignTip(el) {
+    const w = parseFloat(getComputedStyle(el, '::after').width);
+    if (!Number.isFinite(w) || !w) return;
+    const r = el.getBoundingClientRect();
+    const center = r.left + r.width / 2;
+    const crossRight = center + w / 2 > window.innerWidth - 8;
+    const crossLeft = center - w / 2 < 8;
+    el.classList.toggle('tip-flip-r', crossRight && !crossLeft);
+    el.classList.toggle('tip-flip-l', crossLeft && !crossRight);
+  }
+  // Tooltips are position:absolute even while invisible, so an unaligned one
+  // near the viewport edge still widens the document. Align every tooltip as
+  // soon as a workspace renders, not only when the pointer reaches it.
+  function alignAllTips() {
+    document.querySelectorAll('[data-tip]').forEach(el => {
+      el.classList.remove('tip-flip-r', 'tip-flip-l');
+      alignTip(el);
+    });
+  }
+  let tipFrame = 0;
+  function scheduleTipAlign() {
+    if (tipFrame) return;
+    tipFrame = requestAnimationFrame(() => { tipFrame = 0; alignAllTips(); });
+  }
+  function tipAt(e) {
+    const el = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+    if (el) alignTip(el);
+  }
+  document.addEventListener('pointerover', tipAt, true);
+  document.addEventListener('focusin', tipAt, true);
+  window.addEventListener('resize', scheduleTipAlign);
 
   // ---------------------------------------------------------------- overview
   async function loadOverview(force) {

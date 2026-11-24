@@ -83,8 +83,13 @@
     var node = ensureChip();
     if (!node) return;
     node.setAttribute("data-state", state);
+    var text = label || "LIVE";
     var labelNode = node.querySelector("b");
-    if (labelNode) labelNode.textContent = label || "LIVE";
+    if (labelNode) labelNode.textContent = text;
+    // WCAG 2.5.3: the accessible name must contain the visible label, so the
+    // chip text always leads the description instead of being replaced by it.
+    var desc = node.getAttribute("data-desc") || node.title || "Connection status";
+    node.setAttribute("aria-label", text + " · " + desc);
   }
 
   function showToast(message, action, duration, onAction) {
@@ -119,21 +124,25 @@
   }
 
   function refreshOnline() {
+    var desc;
     if (updateReady) {
+      desc = "Update ready — activate to reload";
       setChip("update", "UPDATE");
-      return;
-    }
-    if (navigator.onLine) {
+    } else if (navigator.onLine) {
+      var when = lastCheckedAt ? " · checked " + lastCheckedAt.toLocaleTimeString() : " · not checked yet";
+      desc = "Online" + when + " · evidence data is checked separately in Updates";
       setChip("live", "LIVE");
     } else {
+      desc = "Offline · showing the last synced snapshot";
       setChip("offline", "OFFLINE");
     }
     var node = chip;
     if (node) {
-      var when = lastCheckedAt ? " · checked " + lastCheckedAt.toLocaleTimeString() : " · not checked yet";
-      var title = navigator.onLine ? "Online" + when + " · evidence data is checked separately in Updates" : "Offline · showing the last synced snapshot";
-      node.title = title;
-      node.setAttribute("aria-label", title);
+      node.title = desc;
+      node.setAttribute("data-desc", desc);
+      var labelNode = node.querySelector("b");
+      var text = labelNode ? labelNode.textContent : "LIVE";
+      node.setAttribute("aria-label", text + " · " + desc);
     }
   }
   window.__amayaRefreshOnline = refreshOnline;

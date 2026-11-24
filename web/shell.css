@@ -42,6 +42,9 @@
 * { box-sizing:border-box; }
 
 html, body { height:100%; }
+/* Invisible tooltips near the right edge would otherwise create a stray
+   horizontal scrollbar; clip instead of scroll (no effect on vertical). */
+html { overflow-x:hidden; overflow-x:clip; }
 
 body {
   margin:0;
@@ -958,9 +961,10 @@ a.ae-src:hover { color:var(--accent-2); border-color:rgba(56, 189, 248, .35); te
 .ws-imei.active { display:flex; flex-direction:column; background:#05070f; }
 .ws-imei .ws-head {
   display:flex;
+  flex-wrap:wrap;
   align-items:flex-end;
   justify-content:space-between;
-  gap:16px;
+  gap:10px 16px;
   margin-bottom:0;
   padding:12px 16px;
   border-bottom:1px solid var(--line);
@@ -982,7 +986,14 @@ a.ae-src:hover { color:var(--accent-2); border-color:rgba(56, 189, 248, .35); te
   border:1px solid var(--line);
 }
 .ws-imei .frame-bar h2 { margin:0; font-size:18px; letter-spacing:-.01em; font-weight:600; }
-.ws-imei .frame-actions { gap:6px; justify-content:flex-end; }
+.ws-imei .frame-actions {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  min-width:0;
+}
 .ws-imei .frame-actions .ghost { padding:6px 10px; font-size:11px; }
 .ws-imei .frame-note { font-size:9px; color:var(--dim2); margin-right:2px; }
 .ws-imei .frame-full { display:none; }
@@ -1415,6 +1426,27 @@ button.kpi {
   opacity:1;
   transform:translate(-50%, 0) scale(1);
 }
+/* Edge-aware alignment: shell.js adds these classes just before a centred
+   tooltip would cross the viewport edge, so it flips inward instead of
+   pushing an invisible box past the edge and creating a stray scrollbar. */
+[data-tip].tip-flip-r::after {
+  left:auto;
+  right:0;
+  transform:translate(0, 5px) scale(.96);
+}
+[data-tip].tip-flip-r:hover::after,
+[data-tip].tip-flip-r:focus-visible::after {
+  transform:translate(0, 0) scale(1);
+}
+[data-tip].tip-flip-l::after {
+  left:0;
+  right:auto;
+  transform:translate(0, 5px) scale(.96);
+}
+[data-tip].tip-flip-l:hover::after,
+[data-tip].tip-flip-l:focus-visible::after {
+  transform:translate(0, 0) scale(1);
+}
 #railnav [data-tip]::after, .rail-shortcuts[data-tip]::after {
   left:calc(100% + 12px);
   bottom:50%;
@@ -1518,6 +1550,9 @@ button.kpi {
   #railnav { flex-direction:row; margin-left:auto; gap:3px; overflow-x:auto; scrollbar-width:none; }
   #railnav::-webkit-scrollbar { display:none; }
   #railnav button { width:auto; padding:7px 9px; }
+  /* railnav is its own scroll strip here, so a floating tooltip would be
+     clipped mid-air; native title + aria-label already cover the hint. */
+  #railnav [data-tip]::after { display:none; }
   .rail-foot { display:none; }
   #topbar {
     position:static;
