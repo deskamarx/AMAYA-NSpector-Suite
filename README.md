@@ -39,22 +39,25 @@ the LAN at `http://<this-pc>:4173`.
 
 ## Android
 
-A signed native Android build is generated with Capacitor. It bundles the full
-shell and the AMAYA IMEI Control Center locally, adds native splash/status-bar/
-back handling, and connects to the hosted API for live NSpector ledgers.
+One unified, production-grade APK is generated with Capacitor. It contains all
+five suite workspaces **and** the complete AMAYA IMEI Control Center, which
+opens as a native first-class in-app screen (never an iframe). Native splash,
+status-bar and back handling are included; live NSpector ledgers come from the
+hosted API. Release builds are signed, R8-minified and resource-shrunk, with
+debugging disabled.
 
 ```powershell
-npm run android:build     # APK + AAB into dist\Android
+npm run android:build     # signed APK + AAB into dist\Android
 ```
 
 Outputs:
 
-- `dist\Android\amaya.v1.apk` — short-name signed APK for direct install.
-- `dist\Android\AMAYA-NSpector-v1.0.0-release.apk` — same signed APK, versioned name.
-- `dist\Android\AMAYA-NSpector-v1.0.0-release.aab` — signed Android App Bundle for Google Play.
-- `dist\Android\SHA256SUMS.txt` — release checksums (both APK names share one hash).
+- `dist\Android\AMAYA-NSpector-v2.0.0-enterprise.apk` — the one unified install file.
+- `dist\Android\AMAYA-NSpector-v2.0.0-release.aab` — signed App Bundle for Play distribution.
+- `dist\Android\mapping-v2.0.0.txt` — R8 mapping for internal crash symbolication (do not ship).
+- `dist\Android\SHA256SUMS.txt` — release checksums.
 
-Install with `adb install -r dist\Android\amaya.v1.apk`.
+Install with `adb install -r dist\Android\AMAYA-NSpector-v2.0.0-enterprise.apk`.
 The app needs an internet connection for live data; the desktop build remains
 the fully offline option. The signing keystore is generated locally at
 `android\app\release.jks` and is intentionally gitignored — keep it safe to

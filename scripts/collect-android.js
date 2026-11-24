@@ -1,4 +1,4 @@
-/** collect-android.js — publish signed Android release artifacts to dist/Android. */
+/** collect-android.js — publish the unified enterprise Android release to dist/Android. */
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -7,7 +7,9 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'dist', 'Android');
 const APK = path.join(ROOT, 'android', 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
 const AAB = path.join(ROOT, 'android', 'app', 'build', 'outputs', 'bundle', 'release', 'app-release.aab');
-const VERSION = '1.0.0';
+const MAPPING = path.join(ROOT, 'android', 'app', 'build', 'outputs', 'mapping', 'release', 'mapping.txt');
+const VERSION = '2.0.0';
+const CODE = 2;
 
 function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -16,13 +18,20 @@ function sha256(file) {
 function main() {
   const mode = (process.argv[2] || 'all').toLowerCase();
   const targets = [
-    ['apk', APK, `AMAYA-NSpector-v${VERSION}-release.apk`],
-    ['apk', APK, 'amaya.v1.apk'], // simple share/install alias
-    ['aab', AAB, `AMAYA-NSpector-v${VERSION}-release.aab`]
+    ['apk', APK, `AMAYA-NSpector-v${VERSION}-enterprise.apk`],
+    ['aab', AAB, `AMAYA-NSpector-v${VERSION}-release.aab`],
+    ['mapping', MAPPING, `mapping-v${VERSION}.txt`] // R8 symbolication, internal only
   ].filter(([kind]) => mode === 'all' || mode === kind);
   if (!targets.length) throw new Error('Unknown artifact mode: ' + mode);
 
+  // A version bump must not leave previous-release installers in the output.
   fs.mkdirSync(OUT, { recursive: true });
+  for (const file of fs.readdirSync(OUT)) {
+    if (/\.(apk|aab)$/i.test(file) || /^mapping-.*\.txt$/i.test(file)) {
+      fs.rmSync(path.join(OUT, file), { force: true });
+    }
+  }
+
   const results = [];
   for (const [, src, name] of targets) {
     if (!fs.existsSync(src)) throw new Error('Missing build artifact: ' + src);
@@ -35,15 +44,17 @@ function main() {
   fs.writeFileSync(path.join(OUT, 'SHA256SUMS.txt'),
     results.map(r => `${r.sha256}  ${r.name}`).join('\n') + '\n', 'utf8');
   fs.writeFileSync(path.join(OUT, 'BUILD.txt'), [
-    'AMAYA NSpector — Android release',
-    `Version: ${VERSION} (code 1)`,
+    'AMAYA NSpector — unified enterprise Android release',
+    `Version: ${VERSION} (code ${CODE})`,
     'Package: com.amaya.nspector.suite',
-    `Build: signed release (${[...new Set(targets.map(([kind]) => kind.toUpperCase()))].join(' + ')})`,
+    'Build: signed release, R8 minified, resources shrunk, debugging disabled',
     'API: https://amaya-nspector-docker.onrender.com',
     'Built: ' + new Date().toISOString(),
     '',
-    'The full shell and AMAYA IMEI Control Center are bundled locally.',
-    'Live NSpector ledgers and sync use the hosted API; an internet connection is required for live data.',
+    'One app contains all five suite workspaces and the complete AMAYA IMEI',
+    'Control Center as a native, first-class in-app screen (never an iframe).',
+    'The full snapshot is bundled locally; live ledgers need an internet connection.',
+    'mapping-*.txt is for internal crash symbolication — do not ship it.',
     '',
     ...results.map(r => `${r.name}\n  ${r.bytes} bytes\n  sha256 ${r.sha256}`)
   ].join('\n') + '\n', 'utf8');
