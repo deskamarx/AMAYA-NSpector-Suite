@@ -17,6 +17,7 @@ function main() {
   const mode = (process.argv[2] || 'all').toLowerCase();
   const targets = [
     ['apk', APK, `AMAYA-NSpector-v${VERSION}-release.apk`],
+    ['apk', APK, 'amaya.v1.apk'], // simple share/install alias
     ['aab', AAB, `AMAYA-NSpector-v${VERSION}-release.aab`]
   ].filter(([kind]) => mode === 'all' || mode === kind);
   if (!targets.length) throw new Error('Unknown artifact mode: ' + mode);
@@ -37,7 +38,7 @@ function main() {
     'AMAYA NSpector — Android release',
     `Version: ${VERSION} (code 1)`,
     'Package: com.amaya.nspector.suite',
-    `Build: signed release (${targets.map(([kind]) => kind.toUpperCase()).join(' + ')})`,
+    `Build: signed release (${[...new Set(targets.map(([kind]) => kind.toUpperCase()))].join(' + ')})`,
     'API: https://amaya-nspector-docker.onrender.com',
     'Built: ' + new Date().toISOString(),
     '',

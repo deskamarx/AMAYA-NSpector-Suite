@@ -28,6 +28,7 @@ const must = [
   'web/index.html', 'web/shell.css', 'web/nspector.css', 'web/fonts/fonts.css',
   'capacitor.config.json',
   'vendor/amaya/index.html', 'vendor/amaya/assets/suite-locale-bridge.js',
+  'vendor/amaya/assets/suite-ui-polish.css',
   'vendor/amaya/data/assets.json',
   'vendor/amaya/data/events.json', 'vendor/amaya/data/meta.json',
   'node_modules/better-sqlite3/build/Release/better_sqlite3.node'

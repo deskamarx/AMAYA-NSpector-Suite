@@ -21,8 +21,10 @@ device with two evidence trails.
 | **Data sources** | Local file inventory, snapshot versions and the four source workbooks. |
 
 The IMEI Control Center theme picker is curated to three polished finishes —
-**AMAYA Standard**, **Graphite** and **Paper**. Legacy theme choices migrate
-automatically to the nearest supported finish.
+**AMAYA Standard**, **Graphite** and **Paper**. Text and muted metadata are
+contrast-tuned per finish, and the left navigation floats as its own elevated
+panel on desktop and tablet. Legacy theme choices migrate automatically to the
+nearest supported finish.
 
 ## Run
 
@@ -47,11 +49,12 @@ npm run android:build     # APK + AAB into dist\Android
 
 Outputs:
 
-- `dist\Android\AMAYA-NSpector-v1.0.0-release.apk` — signed APK for direct install.
+- `dist\Android\amaya.v1.apk` — short-name signed APK for direct install.
+- `dist\Android\AMAYA-NSpector-v1.0.0-release.apk` — same signed APK, versioned name.
 - `dist\Android\AMAYA-NSpector-v1.0.0-release.aab` — signed Android App Bundle for Google Play.
-- `dist\Android\SHA256SUMS.txt` — release checksums.
+- `dist\Android\SHA256SUMS.txt` — release checksums (both APK names share one hash).
 
-Install the APK with `adb install -r dist\Android\AMAYA-NSpector-v1.0.0-release.apk`.
+Install with `adb install -r dist\Android\amaya.v1.apk`.
 The app needs an internet connection for live data; the desktop build remains
 the fully offline option. The signing keystore is generated locally at
 `android\app\release.jks` and is intentionally gitignored — keep it safe to
