@@ -540,7 +540,7 @@
   });
 
   /* ===== Theme toggle ===== */
-  var GLASS_THEMES = ["aurora", "midnight", "steel", "graphite", "paper", "solar"];
+  var GLASS_THEMES = ["aurora", "graphite", "paper"];
   var GLASS_THEME_LABELS = {
     aurora: "Aurora", midnight: "Midnight", steel: "Steel",
     graphite: "Graphite", paper: "Paper", solar: "Solar"

@@ -20,6 +20,10 @@ device with two evidence trails.
 | **IMEI Control Center** | A native metrics workspace plus a first-class Control Center window / browser tab — never an iframe. |
 | **Data sources** | Local file inventory, snapshot versions and the four source workbooks. |
 
+The IMEI Control Center theme picker is curated to three polished finishes —
+**AMAYA Standard**, **Graphite** and **Paper**. Legacy theme choices migrate
+automatically to the nearest supported finish.
+
 ## Run
 
 ```powershell

@@ -11,7 +11,7 @@ const files = [
   'web/i18n.js', 'web/nspector.js', 'web/shell.js', 'web/android-native.js',
   'vendor/amaya/assets/suite-locale-bridge.js', 'scripts/build.js',
   'scripts/stage-android.js', 'scripts/android-gradle.js',
-  'scripts/collect-android.js'
+  'scripts/collect-android.js', 'scripts/curate-themes.js'
 ];
 let bad = 0;
 for (const f of files) {
