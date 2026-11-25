@@ -701,6 +701,9 @@
 
   // ---------------------------------------------------------------- AMAYA workspace
   const AMA_PATH = '/amaya-imei-control-center/';
+  // Capacitor's local server rewrites directory URLs to the root SPA index.
+  // The native build must target the bundled Control Center document directly.
+  const AMA_NATIVE_PATH = AMA_PATH + 'index.html';
 
   function evidenceHash(serial) {
     const digits = String(serial || '').replace(/\D/g, '');
@@ -716,7 +719,7 @@
     if (window.SUITE_NATIVE) {
       // On Android the Control Center is a first-class in-app screen, not a popup.
       try { sessionStorage.setItem('suite.control.opened', '1'); } catch (e) {}
-      window.location.assign(AMA_PATH + hash);
+      window.location.assign(AMA_NATIVE_PATH + hash);
       return;
     }
     if (desktop && window.amayaShell.openControlCenter) {

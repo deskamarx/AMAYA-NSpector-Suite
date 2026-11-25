@@ -38,4 +38,12 @@ for (const f of must) {
   if (!fs.existsSync(p)) { bad++; console.error('  MISSING ' + f); }
   else console.log('  ok  ' + f + ' (' + (fs.statSync(p).size / 1024).toFixed(0) + ' KB)');
 }
+const shellSource = fs.readFileSync(path.join(ROOT, 'web/shell.js'), 'utf8');
+const nativeRoute = "window.location.assign(AMA_NATIVE_PATH + hash);";
+if (!shellSource.includes("const AMA_NATIVE_PATH = AMA_PATH + 'index.html';") || !shellSource.includes(nativeRoute)) {
+  bad++;
+  console.error('  ERR native Control Center route must target the bundled index.html');
+} else {
+  console.log('  ok  native Control Center route targets bundled index.html');
+}
 process.exit(bad ? 1 : 0);

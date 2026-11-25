@@ -9,7 +9,7 @@ const APK = path.join(ROOT, 'android', 'app', 'build', 'outputs', 'apk', 'releas
 const AAB = path.join(ROOT, 'android', 'app', 'build', 'outputs', 'bundle', 'release', 'app-release.aab');
 const MAPPING = path.join(ROOT, 'android', 'app', 'build', 'outputs', 'mapping', 'release', 'mapping.txt');
 const VERSION = '2.0.1';
-const CODE = 3;
+const CODE = 4;
 
 function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -61,8 +61,9 @@ function main() {
     'Control Center as a native, first-class in-app screen (never an iframe).',
     'The full snapshot is bundled locally; live ledgers need an internet connection.',
     'v2.0.0 used R8/resource shrinking and could not be verified to launch on',
-    'device, so v2.0.1 restores the proven unshrunk bridge path. Signing identity',
-    'and debuggable=false are unchanged.',
+    'device, so v2.0.1 restores the proven unshrunk bridge path. This reissued',
+    'code 4 fixes the native Control Center route; signing identity and',
+    'debuggable=false are unchanged.',
     '',
     ...results.map(r => `${r.name}\n  ${r.bytes} bytes\n  sha256 ${r.sha256}`)
   ].join('\n') + '\n', 'utf8');
