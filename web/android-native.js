@@ -46,6 +46,26 @@
     })();
   }
 
+  // The native splash must never trap the app if a plugin registers late. The
+  // Capacitor config also enables native auto-hide; this is the web-side retry
+  // so a healthy bridge reveals the UI immediately after first paint.
+  function hideSplash(Splash, attempt) {
+    attempt = attempt || 0;
+    var SplashScreen = Splash || plugin('SplashScreen');
+    if (SplashScreen && typeof SplashScreen.hide === 'function') {
+      try {
+        Promise.resolve(SplashScreen.hide()).catch(function () {});
+        document.documentElement.classList.add('suite-native-ready');
+        return;
+      } catch (e) {
+        // Fall through to retry below.
+      }
+    }
+    if (attempt < 60) {
+      setTimeout(function () { hideSplash(null, attempt + 1); }, 100);
+    }
+  }
+
   function showOffline(show) {
     var id = 'suite-offline-banner';
     var el = document.getElementById(id);
@@ -58,7 +78,7 @@
     el.id = id;
     el.setAttribute('role', 'status');
     el.textContent = copy(locale()).offline;
-    el.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;padding:10px 12px;' +
+    el.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));z-index:9999;padding:10px 12px;' +
       'border:1px solid rgba(255,187,90,.4);border-radius:10px;background:#2a1d0c;color:#ffd9a0;' +
       'font:500 12px/1.45 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.4)';
     document.body.appendChild(el);
@@ -76,7 +96,7 @@
     b.type = 'button';
     b.textContent = copy(locale()).back;
     b.setAttribute('aria-label', copy(locale()).back);
-    b.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:9999;padding:10px 14px;border:1px solid rgba(167,139,250,.45);' +
+    b.style.cssText = 'position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom, 0px));z-index:9999;padding:10px 14px;border:1px solid rgba(167,139,250,.45);' +
       'border-radius:12px;background:rgba(14,18,32,.94);color:#fff;font:600 12px/1 system-ui,sans-serif;' +
       'box-shadow:0 10px 28px rgba(0,0,0,.45);cursor:pointer';
     b.addEventListener('click', function () {
@@ -98,6 +118,7 @@
       try {
         StatusBar.setStyle({ style: 'DARK' });
         StatusBar.setBackgroundColor({ color: '#05070f' });
+        StatusBar.setOverlaysWebView({ overlay: false });
       } catch (e) {}
     }
 
@@ -138,9 +159,7 @@
 
     function finish() {
       addReturnControl();
-      if (Splash) {
-        try { Splash.hide(); } catch (e) {}
-      }
+      hideSplash(Splash, 0);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', finish);
     else finish();

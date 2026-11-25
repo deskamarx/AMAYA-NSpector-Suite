@@ -52,12 +52,13 @@ npm run android:build     # signed APK + AAB into dist\Android
 
 Outputs:
 
-- `dist\Android\AMAYA-NSpector-v2.0.0-enterprise.apk` — the one unified install file.
-- `dist\Android\AMAYA-NSpector-v2.0.0-release.aab` — signed App Bundle for Play distribution.
-- `dist\Android\mapping-v2.0.0.txt` — R8 mapping for internal crash symbolication (do not ship).
+- `dist\Android\AMAYA-NSpector-v2.0.1-enterprise.apk` — the one unified install file.
+- `dist\Android\AMAYA-NSpector-v2.0.1-release.aab` — signed App Bundle for Play distribution.
 - `dist\Android\SHA256SUMS.txt` — release checksums.
 
-Install with `adb install -r dist\Android\AMAYA-NSpector-v2.0.0-enterprise.apk`.
+Install with `adb install -r dist\Android\AMAYA-NSpector-v2.0.1-enterprise.apk`.
+This build keeps the Capacitor bridge unshrunk after a v2.0.0 shrink-related
+launch regression; it is still signed with `debuggable=false`.
 The app needs an internet connection for live data; the desktop build remains
 the fully offline option. The signing keystore is generated locally at
 `android\app\release.jks` and is intentionally gitignored — keep it safe to

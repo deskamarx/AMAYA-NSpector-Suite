@@ -23,9 +23,6 @@
 -keepclassmembers,allowoptimization class * {
     @android.webkit.JavascriptInterface <methods>;
 }
--keepclasseswithmembers class * {
-    public <init>(...);
-}
 
 # Keep runtime-visible annotations (Capacitor reads them at startup).
 -keepattributes *Annotation*, InnerClasses, Signature, EnclosingMethod
@@ -34,6 +31,9 @@
 -keepclasseswithmembernames class * {
     native <methods>;
 }
+
+# Do not keep every public constructor: that hides real R8 regressions and
+# defeats the point of shrinking if it is re-enabled later.
 
 # Crash symbolication mapping is generated at
 # build/outputs/mapping/release/mapping.txt and copied into dist/Android.

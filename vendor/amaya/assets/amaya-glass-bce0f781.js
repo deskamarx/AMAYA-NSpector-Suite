@@ -29,12 +29,33 @@
     document.body.insertBefore(aurora, document.body.firstChild);
   }
 
+  function insetsNumber(side) {
+    var insets = window.__AMAYA_INSETS;
+    return insets && typeof insets[side] === "number" && insets[side] >= 0
+      ? insets[side] + "px"
+      : "0px";
+  }
+
+  function insetValue(side, fallback) {
+    var insets = window.__AMAYA_INSETS;
+    if (insets && typeof insets[side] === "number" && insets[side] >= 0) {
+      return insets[side] + "px";
+    }
+    // Capacitor on Android 15+ renders edge-to-edge. The WebView reports the
+    // status/navigation bars through env(); use them so the top bar never sits
+    // underneath the status bar and the pull control stays reachable.
+    return "env(safe-area-inset-" + side + ", " + fallback + ")";
+  }
+
   function applyInsets() {
-    var insets = window.__AMAYA_INSETS || { top: 0, bottom: 0 };
-    root.style.setProperty("--amaya-top", (insets.top || 0) + "px");
-    root.style.setProperty("--amaya-bottom", (insets.bottom || 0) + "px");
+    var top = insetValue("top", "0px");
+    // The vendored glass CSS already adds env(safe-area-inset-bottom) itself in
+    // its mobile docks, so only a native numeric inset belongs in this token.
+    var bottom = insetsNumber("bottom");
+    root.style.setProperty("--amaya-top", top);
+    root.style.setProperty("--amaya-bottom", bottom);
     var pull = document.getElementById("amaya-pull");
-    if (pull) pull.style.top = "calc(" + (insets.top || 0) + "px + 10px)";
+    if (pull) pull.style.top = "calc(" + top + " + 10px)";
   }
   window.__amayaApplyInsets = applyInsets;
   applyInsets();
@@ -617,6 +638,27 @@
     applyGlassTheme(next);
     showToast("Theme: " + GLASS_THEME_LABELS[next], null, 1800);
   });
+
+  // The React snapshot writes long aria labels that drift from the visible
+  // state/count rows when translated. These buttons already have readable text
+  // children, so let the content name them instead of overriding it.
+  function harmonizeVisibleLabels() {
+    var nodes = document.querySelectorAll(".state-row, .tab-row, .split-card");
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (el.hasAttribute("aria-label")) el.removeAttribute("aria-label");
+    }
+  }
+
+  var labelObserver = null;
+  function watchVisibleLabels() {
+    harmonizeVisibleLabels();
+    if (!labelObserver && document.body) {
+      labelObserver = new MutationObserver(function () { harmonizeVisibleLabels(); });
+      labelObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+  }
+  watchVisibleLabels();
 
   refreshOnline();
   setTimeout(ensureChip, 900);

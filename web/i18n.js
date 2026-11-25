@@ -33,8 +33,8 @@
     'rail.search': 'search',
     'rail.shortcuts': 'Keyboard shortcuts',
     'rail.shortcutsAria': '⌘K search — show keyboard shortcuts',
-    'rail.versionOffline': 'v2.0.0 · offline · local engine',
-    'rail.versionWeb': 'v2.0.0 · live web instance',
+    'rail.versionOffline': 'v2.0.1 · offline · local engine',
+    'rail.versionWeb': 'v2.0.1 · live web instance',
 
     'top.exposure': 'Open exposure',
     'top.exposureTitle': 'Value attached to open NSpector findings',
@@ -213,8 +213,8 @@
     'rail.search': 'খুঁজুন',
     'rail.shortcuts': 'কীবোর্ড শর্টকাট',
     'rail.shortcutsAria': '⌘K খুঁজুন — কীবোর্ড শর্টকাট দেখান',
-    'rail.versionOffline': 'v2.0.0 · অফলাইন · স্থানীয় ইঞ্জিন',
-    'rail.versionWeb': 'v2.0.0 · লাইভ ওয়েব সংস্করণ',
+    'rail.versionOffline': 'v2.0.1 · অফলাইন · স্থানীয় ইঞ্জিন',
+    'rail.versionWeb': 'v2.0.1 · লাইভ ওয়েব সংস্করণ',
 
     'top.exposure': 'খোলা ঝুঁকি',
     'top.exposureTitle': 'খোলা NSpector ফাইন্ডিংয়ের সঙ্গে যুক্ত অর্থমূল্য',
@@ -393,8 +393,8 @@
     'rail.search': '搜索',
     'rail.shortcuts': '键盘快捷键',
     'rail.shortcutsAria': '⌘K 搜索 — 显示键盘快捷键',
-    'rail.versionOffline': 'v2.0.0 · 离线 · 本地引擎',
-    'rail.versionWeb': 'v2.0.0 · 在线实例',
+    'rail.versionOffline': 'v2.0.1 · 离线 · 本地引擎',
+    'rail.versionWeb': 'v2.0.1 · 在线实例',
 
     'top.exposure': '未结风险敞口',
     'top.exposureTitle': '未结 NSpector 发现涉及的金额',

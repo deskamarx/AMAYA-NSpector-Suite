@@ -10,11 +10,13 @@
   },
   "plugins": {
     "SplashScreen": {
-      "launchAutoHide": false,
+      "launchAutoHide": true,
+      "launchShowDuration": 1200,
+      "launchFadeOutDuration": 220,
       "backgroundColor": "#05070f",
       "androidSplashResourceName": "splash",
-      "splashFullScreen": true,
-      "splashImmersive": true
+      "splashFullScreen": false,
+      "splashImmersive": false
     },
     "StatusBar": {
       "overlaysWebView": false,

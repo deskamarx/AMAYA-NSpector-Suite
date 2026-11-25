@@ -1,5 +1,5 @@
 html {
-  --amaya-top: 0px;
+  --amaya-top: env(safe-area-inset-top, 0px);
   --amaya-bottom: 0px;
   --amaya-radius: 22px;
   --amaya-border: rgba(255, 255, 255, 0.14);
@@ -1160,7 +1160,7 @@ html[data-glass-theme="paper"] {
   --amaya-shadow-soft: 0 10px 32px -16px rgba(15, 23, 42, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   --amaya-blur: blur(22px) saturate(165%);
   --amaya-blur-strong: blur(30px) saturate(185%);
-  --amaya-top: 0px;
+  --amaya-top: env(safe-area-inset-top, 0px);
   --amaya-bottom: 0px;
 }
 
